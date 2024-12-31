@@ -1,0 +1,4 @@
+#Root .gitignore
+
+#Python Stuff
+/venv
