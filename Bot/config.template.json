@@ -1,0 +1,13 @@
+{
+    "token": "",
+    "redis": {
+        "host": "",
+        "port": 6379,
+        "password": "",
+        "channels": {
+            "chat_recv": "chat-recv",
+            "chat_send": "chat-send",
+            "collection log": "collection-log"
+        }
+    }
+}

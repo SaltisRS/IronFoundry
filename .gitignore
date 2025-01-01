@@ -1,1 +1,4 @@
 #Root Gitignore
+
+/venv*
+.vscode
