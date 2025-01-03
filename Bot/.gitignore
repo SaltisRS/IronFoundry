@@ -1,2 +1,2 @@
-#
-config.json
+# Discord Bot Gitignore
+.env
