@@ -9,9 +9,10 @@ from client.modules.redis_client import RedisClient
 
 
 class DiscordClient(discord.Client):
-    def __init__(self):
+    def __init__(self, config: dict):
         super().__init__(intents=discord.Intents.all())
         load_dotenv()
+        self.config = config
         self.token = os.getenv("DISCORD_TOKEN")
         
         
