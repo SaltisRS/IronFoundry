@@ -1,12 +1,9 @@
 FROM python:3.13.1-slim
 
-ENV PYTHONUNBUFFERED 1
+WORKDIR /ironfoundry
 
-WORKDIR /
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
 
-COPY . /
-
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
-
-CMD ["py", "main.py"]
+CMD [ "python", "app/main.py" ]

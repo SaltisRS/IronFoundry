@@ -1,7 +1,0 @@
-{
-    "redis": {
-        "collectionlog" : "collection-log",
-        "chat-send" : "chat-send",
-        "chat-receive" : "chat-recv"
-    }
-}

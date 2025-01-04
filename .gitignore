@@ -1,5 +1,6 @@
 #Root Gitignore
-
+**/__pycache__
 /venv*
 .vscode
 */.env
+.env

@@ -1,0 +1,52 @@
+services:
+  bot:
+    build:
+      ./bot
+    volumes:
+      - ./bot:/app
+    networks:
+      - app-network
+    depends_on:
+      - Redis
+      #- Api
+    env_file:
+      - .env
+  
+  #Api:
+    #build:
+      #context: ./Api
+    #ports:
+      #- 443:443
+      #- 80:80
+    #volumes:
+      #- ./Api:/api
+    #networks:
+      #- app-network
+    #depends_on:
+      #- Redis
+    #env_file:
+      #- .env
+  
+  Redis:
+    image: redis:latest
+    ports:
+      - 6379:6379
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "-h", "localhost", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    networks:
+      - app-network
+    volumes:
+      - redis-data:/data
+  
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+    driver: local

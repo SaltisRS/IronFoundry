@@ -32,7 +32,8 @@ class RedisClient:
                 logger.success("Connected to redis cache")
                 self.reconnect = False
                 return self.client
-            except redis.ConnectionError:
+            except (redis.ConnectionError, redis.TimeoutError, redis.AuthenticationError):
+                self.client = None
                 retries += 1
                 logger.warning(f"Could not connect to redis cache, retrying in {2 ** retries} seconds. {retries}/7") 
                 if retries >= 7: # Exponential backoff, 2^7 = 128 seconds
@@ -40,7 +41,7 @@ class RedisClient:
                     self.reconnect = False
                     break
                 await asyncio.sleep(2 ** retries)
-                return None
+                continue
     
     async def subscribe(self, channel: str) -> PubSub:
         if not self.client and not self.reconnect:

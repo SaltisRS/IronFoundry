@@ -1,2 +1,3 @@
 # Discord Bot Gitignore
-.env
+
+*/logs/*
