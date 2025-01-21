@@ -15,7 +15,6 @@ class DiscordClient(discord.Client):
         load_dotenv()
         self.token = os.getenv("DISCORD_TOKEN")
         self.redis_client = RedisClient()
-        self.redis_chnls = ["chat-send", "chat-recv", "collection-log"]
         
         
     # Setup for Redis and other services/modules
