@@ -21,6 +21,10 @@ class DiscordClient(discord.Client):
     # Setup for Redis and other services/modules
     async def setup_hook(self):
         await self.redis_client.connect()
+        
+    async def on_member_join(self, member: discord.Member):
+        logger.info(f"{member} joined the server")
+        await member.add_roles(*[discord.Object(id=1279492982902358119),discord.Object(id=1279852765803446403),discord.Object(id=1277240949524664370)])
 
 
     
