@@ -1,9 +1,9 @@
 services:
   bot:
     build:
-      ./bot
+      ./Bot
     volumes:
-      - ./bot:/app
+      - ./Bot:/app
     networks:
       - app-network
     depends_on:
