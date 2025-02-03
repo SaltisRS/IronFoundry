@@ -1,5 +1,6 @@
 import os
 
+from loguru import logger
 from pymongo import AsyncMongoClient
 from pymongo.asynchronous.collection import AsyncCollection
 from pymongo.asynchronous.cursor import AsyncCursor
@@ -30,18 +31,25 @@ class MongoClient:
     
     async def set_database(self, database: str) -> str:
         if not self.client:
-            return "No connection established"
+            raise Exception("Must connect to the client before setting the database")
         self.db = self.client[database]
-        return f"{database} set as the active database"
+        logger.debug(f"Database set to {database}")
+        return True
     
-    async def get_collection(self, collection: str) -> AsyncCollection:
+    async def get_collection(self, collection: str) -> AsyncCollection | None:
         return self.db[collection]
     
-    async def get_document(self, collection: str, query: dict) -> dict:
-        return await self.client[self.db][collection].find_one(query)
+    async def get_document(self, collection: str, query: dict) -> dict | None:
+        doc = await self.client[self.db][collection].find_one(query)
+        if not doc:
+            raise Exception("Document not found")
+        return doc
     
     async def get_many(self, collection: str, query: dict) -> AsyncCursor:
-        return await self.client[self.db][collection].find(query)
+        docs = await self.client[self.db][collection].find(query)
+        if not docs:
+            raise Exception("No documents found")
+        return docs
     
     async def get_count(self, collection: str, query: dict = {}) -> int:
         return await self.client[self.db][collection].count_documents(query)
