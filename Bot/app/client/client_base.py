@@ -34,6 +34,12 @@ class DiscordClient(discord.Client):
     
     #! Do NOT handle Bot setup here, use setup_hook instead as it runs before bot start.
     async def on_ready(self):
-        await self.tree.sync(guild=discord.Object(id=945052365327839254))
+        _guild = None
+        for guild in self.guilds:
+            if guild.id == 945052365327839254:
+                _guild = guild
+                break
+                
+        await self.tree.sync(guild=_guild)
         logger.info(f"Bot is ready as {self.user} at {datetime.now()}")
 
