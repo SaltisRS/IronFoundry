@@ -40,6 +40,7 @@ class DiscordClient(discord.Client):
                 _guild = guild
                 break
                 
-        await self.tree.sync(guild=_guild)
+        result = await self.tree.sync(guild=_guild)
+        logger.info(result, "\n", _guild)
         logger.info(f"Bot is ready as {self.user} at {datetime.now()}")
 
