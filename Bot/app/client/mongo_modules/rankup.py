@@ -89,6 +89,19 @@ async def start_rankup(user_id: int):
         await client.close()
         global connected
         connected = False
+        
+async def get_active_rankup(user_id: int) -> None | dict:
+    await client_connect()
+    try:
+        active_rankup = await client.get_document("Active Rankups", {"_id": user_id})
+        return active_rankup
+    except Exception as e:
+        logger.error(f"Error getting active rankup: {e}")
+        return None
+    finally:
+        await client.close()
+        global connected
+        connected = False
 
 async def update_active_rankup(user_id: int, rank: str):
     await client_connect()
