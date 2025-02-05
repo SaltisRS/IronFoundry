@@ -39,7 +39,7 @@ class DiscordClient(discord.Client):
             if guild.id == 945052365327839254:
                 _guild = guild
                 break
-                
+        self.tree.add_command(self._add_role)
         result = await self.tree.sync(guild=_guild)
         logger.info(result, "\n", _guild)
         logger.info(f"Bot is ready as {self.user} at {datetime.now()}")
