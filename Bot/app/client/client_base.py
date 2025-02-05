@@ -13,7 +13,7 @@ class DiscordClient(discord.Client):
     def __init__(self):
         super().__init__(intents=discord.Intents.all())
         load_dotenv()
-        self.tree = app_commands.CommandTree()
+        self.tree = app_commands.CommandTree(self)
         self.token = os.getenv("DISCORD_TOKEN")
         self.redis_client = RedisClient()
         
