@@ -41,6 +41,7 @@ class DiscordClient(discord.Client):
                 break
         self.tree.add_command(self._add_role)
         result = await self.tree.sync(guild=_guild)
-        logger.info(result, "\n", _guild)
+        if result:
+            logger.info(f"Command tree synced successfully")
         logger.info(f"Bot is ready as {self.user} at {datetime.now()}")
 
