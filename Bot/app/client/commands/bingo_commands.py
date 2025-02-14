@@ -100,7 +100,7 @@ async def parse_completed_tiles(tile_doc: dict) -> discord.Embed:
     
     for team in tile_doc:
         logger.debug(team["approved_tiles"])
-        if not team["denied_tiles"]:
+        if not team["approved_tiles"]:
             continue
         team_role: discord.Role = discord.utils.get(teams, id=team["_id"])
         embed.add_field(
@@ -119,13 +119,9 @@ async def parse_denied_tiles(tile_doc: dict) -> discord.Embed:
     )
     print(tile_doc)
     for team in tile_doc:
-        logger.debug(team["approved_tiles"])
+        logger.debug(team["denied_tiles"])
         team_role: discord.Role = discord.utils.get(teams, id=team["_id"])
         if not team["denied_tiles"]:
-            embed.add_field(
-             name=team_role.name,
-                value="No denied tiles.",
-                inline=False)
             continue
         
         embed.add_field(
@@ -178,8 +174,9 @@ async def get_board(interaction: discord.Interaction, visible: bool = False):
     await interaction.response.send_message(board_image, ephemeral=not visible)
 
 @group.command()
+@app_commands.describe(extra_link="Discord Message link, Thread link or other discord resource. Linking off site is NOT allowed. ex. Gyazo, Imgur, etc.")
 @app_commands.autocomplete(tile=tile_autocomplete)
-async def submit(interaction: discord.Interaction, tile: str, attachment: discord.Attachment):
+async def submit(interaction: discord.Interaction, tile: str, attachment: discord.Attachment, extra_link: str = None):
     """
     Submit a bingo tile for approval.
     """
@@ -195,7 +192,8 @@ async def submit(interaction: discord.Interaction, tile: str, attachment: discor
             "original_channel": interaction.channel.id, 
             "reason": None, 
             "submitter": interaction.user.id,
-            "timestamp": datetime.now(tz=UTC)
+            "timestamp": datetime.now(tz=UTC),
+            "extra": extra_link
             }
         embed = discord.Embed(
             title=tile.removesuffix(tile[-5:]),
@@ -206,6 +204,8 @@ async def submit(interaction: discord.Interaction, tile: str, attachment: discor
         )
         embed.set_footer(text=str("Board Coords: " + tile[-5:]))
         embed.set_image(url=attachment.url)
+        if extra_link:
+            embed.add_field(name="Link to extra context", value=extra_link)
         view = BingoView(team=team, tile=new_tile)
         sub_channel = discord.utils.get(interaction.guild.channels, id=1335725797532766218)
         await sub_channel.send(embed=embed, view=view)
@@ -230,6 +230,14 @@ async def completed(interaction: discord.Interaction):
     """
     embed = await parse_completed_tiles(await get_completed_tiles())
     await interaction.response.send_message(embed=embed, ephemeral=True)
+    
+    
+@group.command()
+async def wiseoldman(interaction: discord.Interaction):
+    """
+    Get a link to the current running competition.
+    """
+    await interaction.response.send_message("https://wiseoldman.net/competitions/77923")
 
     
 @group.command()
@@ -259,6 +267,11 @@ async def help(interaction: discord.Interaction):
     embed.add_field(
         name="/bingo completed",
         value="Get all completed bingo tiles by Team.",
+        inline=False
+    )
+    embed.add_field(
+        name="/bingo wiseoldman",
+        value="Get a link to the current running competition, filter using Preview As and select the skill/boss to show.",
         inline=False
     )
     await interaction.response.send_message(embed=embed)
