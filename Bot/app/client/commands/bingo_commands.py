@@ -250,7 +250,7 @@ async def help(interaction: discord.Interaction):
         color=discord.Color.random()
     )
     embed.add_field(
-        name="/bingo submit [tile] [attachment]",
+        name="/bingo submit [tile] [attachment] [extra_link (optional)]",
         value="Submit a bingo tile for approval, make sure to:\n - Select from the autocomplete list. Anything else will call an error.\n - Attach an image per the instructions in the rules. This can either be a file or copy pasted from clipboard. (links do not work)\n > If you are on windows, i recommend pressing win+shift+s to use the built in snipping tool. This will copy the image to your clipboard and you can paste it directly into discord. Full client screenshots are preferred.\n > A staff/legend member will review the tile and either approve or deny it.",
         inline=False
     )

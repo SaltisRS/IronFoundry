@@ -5,7 +5,7 @@ def tiles() -> list[str]:
 "Obtain 2 of the Wilderness weapon upgrade (skull, claws, fang) or any 1 voidwaker piece (1,2)",
 "Obtain 2 Tormented Synapses or 2 Burning Claw (1,3)",
 "Obtain 2 of the following (Any Keris Partisan Jewel, Dex/Arcane Prayer scroll) (1,4)",
-"Obtain all of the following: (Deadeye Scroll, Mystic Vigour scroll, giantsoul amulet, Ice and fire element staff crown) (1,5)",
+"Defeat Royal Titans 850 times. (1,5)",
 "Obtain an Enhanced Crystal Weapon Seed or 4 Crystal Armour seeds. (1,6)",
 "Obtain 3 Dragon Pickaxe (2,1)",
 "Obtain a Dragon War Hammer (2,2)",
