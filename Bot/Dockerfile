@@ -1,9 +1,11 @@
 FROM python:3.13.1-slim
+WORKDIR /Bot
 
-WORKDIR /ironfoundry
+COPY . /Bot
 
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
-COPY . .
+RUN apt-get update && apt-get install -y curl redis-tools && apt-get clean
+
+RUN pip install --no-cache-dir --upgrade -r requirements.txt
+
 
 CMD [ "python", "app/main.py" ]

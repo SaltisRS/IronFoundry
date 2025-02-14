@@ -9,26 +9,26 @@ services:
     depends_on:
       Redis:
         condition: service_healthy
-      #- Api
+      api:
+        condition: service_started
     env_file:
       - .env
 
   
-  #Api:
-    #build:
-      #context: ./Api
-    #ports:
-      #- 443:443
-      #- 80:80
-    #volumes:
-      #- ./Api:/api
-    #networks:
-      #- app-network
-    #depends_on:
-      #- Redis
-    #env_file:
-      #- .env
+  api:
+    build:
+      ./Api
+    volumes:
+      - ./Api:/app
+    networks:
+      - app-network
+    depends_on:
+      Redis:
+        condition: service_healthy
+    env_file:
+      - .env
   
+
   Redis:
     image: redis:latest
     ports:

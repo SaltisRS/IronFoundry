@@ -32,7 +32,8 @@ class RedisClient:
                 logger.success("Connected to redis cache")
                 self.reconnect = False
                 return self.client
-            except (redis.ConnectionError, redis.TimeoutError, redis.AuthenticationError):
+            except (redis.ConnectionError, redis.TimeoutError, redis.AuthenticationError) as exc:
+                logger.error(exc)
                 self.client = None
                 retries += 1
                 logger.warning(f"Could not connect to redis cache, retrying in {2 ** retries} seconds. {retries}/7") 
