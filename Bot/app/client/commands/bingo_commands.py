@@ -96,7 +96,6 @@ async def parse_completed_tiles(tile_doc: dict) -> discord.Embed:
         title="Completed Bingo Tiles",
         color=discord.Color.random()
     )
-    print(tile_doc)
     
     for team in tile_doc:
         logger.debug(team["approved_tiles"])
@@ -104,7 +103,7 @@ async def parse_completed_tiles(tile_doc: dict) -> discord.Embed:
             continue
         team_role: discord.Role = discord.utils.get(teams, id=team["_id"])
         embed.add_field(
-            name=team_role.name,
+            name=str(team_role.name + f"{len(team["approved_tiles"])} Tiles Completed"),
             value="\n".join([tile["tile"] for tile in team["approved_tiles"]]),
             inline=False
         )
@@ -117,20 +116,16 @@ async def parse_denied_tiles(tile_doc: dict) -> discord.Embed:
         title="Denied Bingo Tiles",
         color=discord.Color.random()
     )
-    print(tile_doc)
     for team in tile_doc:
         logger.debug(team["denied_tiles"])
-        team_role: discord.Role = discord.utils.get(teams, id=team["_id"])
         if not team["denied_tiles"]:
             continue
-        
+        team_role: discord.Role = discord.utils.get(teams, id=team["_id"])
         embed.add_field(
             name=team_role.name,
-            value="\n".join(
-                [f"{tile['tile']}\n```Reason: {tile['reason']}```" for tile in team["denied_tiles"]]
-            ),
-    inline=False
-)
+            value="\n".join([f"{tile['tile']}\n```Reason: {tile['reason']}```" for tile in team["denied_tiles"]]),
+            inline=False
+        )
     logger.debug(embed.__repr__())
     return embed
     
