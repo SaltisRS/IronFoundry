@@ -47,7 +47,12 @@ class BingoView(discord.ui.View):
     async def approve(self, interaction: discord.Interaction, button: discord.ui.Button):
         #Check if user is authorized
         if interaction.user.id not in await get_approved_users():
-            return await interaction.response.send_message("You are not authorized to approve tiles.", ephemeral=True)
+            await interaction.response.send_message("You are not authorized to approve tiles.", ephemeral=True)
+            return
+        for role in interaction.user.roles:
+            if role == self.team:
+                await interaction.response.send_message("You cannot approve tiles for your own team.", ephemeral=True)
+                return
         
         await interaction.response.send_message("Tile approved.", ephemeral=True, delete_after=5)
         
@@ -103,7 +108,7 @@ async def parse_completed_tiles(tile_doc: dict) -> discord.Embed:
             continue
         team_role: discord.Role = discord.utils.get(teams, id=team["_id"])
         embed.add_field(
-            name=str(team_role.name + f"{len(team["approved_tiles"])} Tiles Completed"),
+            name=str(team_role.name + f"{len(team["approved_tiles"])} : Tiles Completed"),
             value="\n".join([tile["tile"] for tile in team["approved_tiles"]]),
             inline=False
         )
@@ -176,7 +181,8 @@ async def submit(interaction: discord.Interaction, tile: str, attachment: discor
     Submit a bingo tile for approval.
     """
     if tile not in board:
-        return await interaction.response.send_message(f"{tile} is not a valid bingo tile, make sure to select from autocomplete's list.", ephemeral=True)
+        await interaction.response.send_message(f"{tile} is not a valid bingo tile, make sure to select from autocomplete's list.", ephemeral=True)
+        return
     
     await interaction.response.send_message(f"**Tile:**\n ```{tile}```\n\n*Submitted for approval.*", ephemeral=False)
     try:
@@ -190,6 +196,7 @@ async def submit(interaction: discord.Interaction, tile: str, attachment: discor
             "timestamp": datetime.now(tz=UTC),
             "extra": extra_link
             }
+        
         embed = discord.Embed(
             title=tile.removesuffix(tile[-5:]),
             description=f"Submitted by {interaction.user.mention} for {team.mention}",
