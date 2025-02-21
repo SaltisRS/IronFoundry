@@ -8,7 +8,8 @@ from loguru import logger
 
 from client.modules.redis_client import RedisClient
 from client.events.on_message import handle_message
-from client.commands.bingo_commands import setup
+from client.commands.bingo_commands import setup as bingo_setup
+from client.commands.system import setup as system_setup
 #from client.commands.system import add_system_user
 
 
@@ -35,7 +36,8 @@ class DiscordClient(discord.Client):
         
             
     async def load_commands(self):
-        await setup(self, self.selected_guild)
+        await bingo_setup(self, self.selected_guild)
+        await system_setup(self, self.selected_guild)
         result = await self.tree.sync(guild=self.selected_guild)
         logger.info(f"Commands loaded: {result}")
         

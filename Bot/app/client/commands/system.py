@@ -46,3 +46,7 @@ async def whitelist_link(interaction: discord.Interaction, link: str):
         await interaction.response.send_message(f"{link} whitelisted.", ephemeral=True)
     else:
         await interaction.response.send_message("You do not have permission to run this command", ephemeral=True)
+
+
+async def setup(client: discord.Client, guild: discord.Guild):
+    client.tree.add_command(system, guild=guild)
