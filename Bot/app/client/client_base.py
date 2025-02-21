@@ -7,6 +7,7 @@ from datetime import datetime
 from loguru import logger
 
 from client.modules.redis_client import RedisClient
+from client.events.on_message import handle_message
 from client.commands.bingo_commands import setup
 #from client.commands.system import add_system_user
 
@@ -44,7 +45,10 @@ class DiscordClient(discord.Client):
         await self.redis_client.connect()
         await self.set_guild()
         await self.load_commands()
-        
+    
+    async def on_message(self, message: discord.Message):
+        handle_message(self, message)    
+    
     async def on_member_join(self, member: discord.Member):
         logger.info(f"{member} joined the server")
         await member.add_roles(*[discord.Object(id=1279492982902358119),discord.Object(id=1279852765803446403),discord.Object(id=1277240949524664370), discord.Object(id=1333568211987206238)])
