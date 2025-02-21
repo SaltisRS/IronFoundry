@@ -49,7 +49,7 @@ class DiscordClient(discord.Client):
         await self.load_commands()
     
     async def on_message(self, message: discord.Message):
-        handle_message(self, message)    
+        await handle_message(self, message)    
     
     async def on_member_join(self, member: discord.Member):
         logger.info(f"{member} joined the server")
