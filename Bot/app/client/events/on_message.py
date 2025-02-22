@@ -15,12 +15,10 @@ DISCORD_INVITE_REGEX = re.compile(r"(?:https?://)?(?:discord\.gg|discord\.com/in
 async def get_whitelisted_links() -> set[str] | None:
     try:
         links = await client.get_many(collection="System", query={"tag": "whitelisted_url"})
-        allowed_links = set()
-        if doc is None:
-            return
-        for doc in links:
-            allowed_links.add(doc["url"])
-            
+        if not links:
+            return None
+        
+        allowed_links = {doc["url"] for doc in links} 
         return allowed_links
     
     except Exception as e:
