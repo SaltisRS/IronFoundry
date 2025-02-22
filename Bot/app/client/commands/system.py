@@ -12,8 +12,8 @@ system = System()
 
 owner = os.getenv("OWNER_ID")
 
-async def check_sysadmin(user: discord.User) -> bool:
-    _user = await mongodb.get_document(collection="Users", query={"_id": str(user.id)})
+async def check_sysadmin(interaction: discord.Interaction) -> bool:
+    _user = await mongodb.get_document(collection="Users", query={"_id": str(interaction.user.id)})
     if _user:
         return _user["individual_permissions"]["sysadmin"]
     return False
@@ -41,11 +41,8 @@ async def add_system_user(interaction: discord.Interaction, user: discord.User =
 @system.command()
 @app_commands.check(check_sysadmin)
 async def whitelist_link(interaction: discord.Interaction, link: str):
-    if await check_sysadmin(interaction.user) == True:
         await mongodb.insert_document(collection="System", document={"tag": "whitelisted_url", "url": link})
         await interaction.response.send_message(f"{link} whitelisted.", ephemeral=True)
-    else:
-        await interaction.response.send_message("You do not have permission to run this command", ephemeral=True)
 
 
 async def setup(client: discord.Client, guild: discord.Guild):
