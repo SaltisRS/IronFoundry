@@ -44,6 +44,15 @@ async def whitelist_link(interaction: discord.Interaction, link: str):
         await mongodb.insert_document(collection="System", document={"tag": "whitelisted_url", "url": link})
         await interaction.response.send_message(f"{link} whitelisted.", ephemeral=True)
 
+@system.command()
+async def get_whitelisted_links(interaction: discord.Interaction):
+    links = await mongodb.get_many(collection="System", query={"tag": "whitelisted_url"})
+    if not links:
+        await interaction.response.send_message("No whitelisted links found.", ephemeral=True)
+        return
+    links = [f"https://discord.gg/{doc['url']}" for doc in links]
+    await interaction.response.send_message("\n".join(links), ephemeral=True)
+
 
 async def setup(client: discord.Client, guild: discord.Guild):
     client.tree.add_command(system, guild=guild)
