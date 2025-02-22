@@ -51,7 +51,7 @@ async def get_whitelisted_links(interaction: discord.Interaction):
         await interaction.response.send_message("No whitelisted links found.", ephemeral=True)
         return
     links = [f"https://discord.gg/{doc['url']}" for doc in links]
-    await interaction.response.send_message("\n".join(links), ephemeral=True, suppress_embeds=True)
+    await interaction.response.send_message("```" + "\n".join(links) + "```", ephemeral=True, suppress_embeds=True)
 
 
 async def setup(client: discord.Client, guild: discord.Guild):
