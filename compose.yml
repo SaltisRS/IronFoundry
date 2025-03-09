@@ -11,29 +11,29 @@ services:
     depends_on:
       Redis:
         condition: service_healthy
-      api:
-        condition: service_started
+      #api:
+        #condition: service_started
     env_file:
       - .env
 
   
-  api:
-    container_name: if-api
-    build:
-      ./Api
-    ports:
-      - 5050:80
-      - 4040:80
-    volumes:
-      - ./Api:/app
-      - pip-cache:/root/.cache/pip
-    networks:
-      - app-network
-    depends_on:
-      Redis:
-        condition: service_healthy
-    env_file:
-      - .env
+  #api:
+    #container_name: if-api
+    #build:
+      #./Api
+    #ports:
+      #- 5050:80
+      #- 4040:80
+    #volumes:
+      #- ./Api:/app
+      #- pip-cache:/root/.cache/pip
+    #networks:
+      #- app-network
+    #depends_on:
+      #Redis:
+        #condition: service_healthy
+    #env_file:
+      #- .env
   
 
   Redis:
