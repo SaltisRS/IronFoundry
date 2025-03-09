@@ -56,5 +56,5 @@ async def send_ticket_view(interaction: discord.Interaction):
     
 async def ticket_setup(client: discord.Client, guild: discord.Guild):
     client.tree.add_command(send_ticket_view, guild=guild)
-    client.add_view(TicketView)
-    client.add_view(InnerTicketView)
+    client.add_view(TicketView())
+    client.add_view(InnerTicketView())
