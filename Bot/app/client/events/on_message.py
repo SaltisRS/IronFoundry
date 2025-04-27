@@ -46,5 +46,7 @@ async def handle_message(client: discord.Client, message: discord.Message):
         await message.author.send(embed=discord.Embed(title="Non whitelisted Discord Link.", description=f"Your message contained a link that is not whitelisted. Please remove the following link(s) and try again.: {link_check}", color=discord.Color.red()))
         await message.delete()
         return
+    if message.author.id == 406502736528408608:
+        await message.reply("Hey! Im Jimmy, I got a little drunk the other day...")
     
     
