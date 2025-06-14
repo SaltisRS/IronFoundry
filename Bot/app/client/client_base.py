@@ -10,7 +10,11 @@ from client.modules.redis_client import RedisClient
 from client.events.on_message import handle_message
 from client.modules.ticket import ticket_setup
 from client.commands.system import setup as system_setup
-#from client.commands.system import add_system_user
+
+
+join_msg = """### Welcome to Iron Foundry!
+Head on over to #💬-speak-to-staff and create a **Rank Up** ticket to be ranked and invited into the cc!"""
+
 
 
 class DiscordClient(discord.Client):
@@ -52,9 +56,10 @@ class DiscordClient(discord.Client):
         await handle_message(self, message)    
     
     async def on_member_join(self, member: discord.Member):
+        general = self.get_channel(945052365873090652)
         logger.info(f"{member} joined the server")
         await member.add_roles(*[discord.Object(id=1279492982902358119),discord.Object(id=1279852765803446403),discord.Object(id=1277240949524664370), discord.Object(id=1333568211987206238)])
-        
+        await general.send(f"{join_msg}\n\n{member.mention}")
     
     #! Do NOT handle Bot setup here, use setup_hook instead as it runs before bot start.
     async def on_ready(self):
