@@ -53,21 +53,27 @@ class PromptView(discord.ui.View):
     
     @discord.ui.button(label="Use Default", style=discord.ButtonStyle.green, custom_id="default_vc_btn")
     async def use_default(self, interaction: discord.Interaction, button: discord.ui.Button):
-        if not await check_set(interaction.user.id):
-            category = interaction.guild.get_channel(vc_cat)
-            channel = await category.create_voice_channel(name=interaction.user.name, options={"position": 1})
-            await insert_set(channel, interaction.user.id)
-            await interaction.response.send_message(f"Created channel: {channel.name}", ephemeral=True, delete_after=5)
-            await self_destruct(channel, interaction.user.id)
-            return
+        try:
+            if not await check_set(interaction.user.id):
+                category = interaction.guild.get_channel(vc_cat)
+                channel = await category.create_voice_channel(name=interaction.user.name, options={"position": 1})
+                await insert_set(channel, interaction.user.id)
+                await interaction.response.send_message(f"Created channel: {channel.name}", ephemeral=True, delete_after=5)
+                await self_destruct(channel, interaction.user.id)
+                return
+        except Exception as e:
+            logger.error(e)
         
         await interaction.response.send_message("You already have a voice channel.")
     
     
     @discord.ui.button(label="Configure", style=discord.ButtonStyle.blurple, custom_id="config_vc_btn")
     async def configure_vc(self, interaction: discord.Interaction, button: discord.ui.Button):
-        if not await check_set(interaction.user.id):
-            await interaction.response.send_modal(PromptModal())
+        try:
+            if not await check_set(interaction.user.id):
+                await interaction.response.send_modal(PromptModal())
+        except Exception as e:
+            logger.error(e)
             
         await interaction.response.send_message("You already have a voice channel.")
 
