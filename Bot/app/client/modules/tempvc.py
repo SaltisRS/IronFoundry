@@ -66,7 +66,7 @@ class PromptView(discord.ui.View):
     
     @discord.ui.button(label="Configure", style=discord.ButtonStyle.blurple, custom_id="config_vc_btn")
     async def configure_vc(self, interaction: discord.Interaction, button: discord.ui.Button):
-        if not check_set(interaction.user.id):
+        if not await check_set(interaction.user.id):
             await interaction.response.send_modal(PromptModal())
             
         await interaction.response.send_message("You already have a voice channel.")
