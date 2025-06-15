@@ -42,7 +42,7 @@ class PromptModal(discord.ui.Modal, title="VC Settings"):
     
     async def on_submit(self, interaction: discord.Interaction):
         category = interaction.guild.get_channel(vc_cat)
-        channel = await category.create_voice_channel(name=self.name.value if self.name.value else interaction.user.name, **{"user_limit": int(self.limit.value) if self.limit.value else None})
+        channel = await category.create_voice_channel(name=self.name.value if self.name.value else interaction.user.name, user_limit=int(self.limit.value) if self.limit.value else None)
         await insert_set(channel, interaction.user.id)
         await interaction.response.send_message(f"Created channel: {channel.name}\nWith config: 'name: {self.name.value}' 'limit: {self.limit.value}'", ephemeral=True, delete_after=5)
         await self_destruct(channel, interaction.user.id)
@@ -56,7 +56,7 @@ class PromptView(discord.ui.View):
         try:
             if not await check_set(interaction.user.id):
                 category = interaction.guild.get_channel(vc_cat)
-                channel = await category.create_voice_channel(name=interaction.user.name, **{"position": 1})
+                channel = await category.create_voice_channel(name=interaction.user.name, position=1)
                 await insert_set(channel, interaction.user.id)
                 await interaction.response.send_message(f"Created channel: {channel.name}", ephemeral=True, delete_after=5)
                 await self_destruct(channel, interaction.user.id)
