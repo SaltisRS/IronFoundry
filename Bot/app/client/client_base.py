@@ -10,6 +10,8 @@ from client.modules.redis_client import RedisClient
 from client.events.on_message import handle_message
 from client.modules.ticket import ticket_setup
 from client.commands.system import setup as system_setup
+from client.modules.tempvc import voice_state_update
+from client.modules.tempvc import setup as tempvc_setup
 
 
 join_msg = """### Welcome to Iron Foundry!
@@ -42,6 +44,7 @@ class DiscordClient(discord.Client):
     async def load_commands(self):
         await ticket_setup(self, self.selected_guild)
         await system_setup(self, self.selected_guild)
+        await tempvc_setup(self, self.selected_guild)
         result = await self.tree.sync(guild=self.selected_guild)
         logger.info(f"Commands loaded: {result}")
         
@@ -60,6 +63,9 @@ class DiscordClient(discord.Client):
         logger.info(f"{member} joined the server")
         await member.add_roles(*[discord.Object(id=1279492982902358119),discord.Object(id=1279852765803446403),discord.Object(id=1277240949524664370), discord.Object(id=1333568211987206238)])
         await general.send(f"{join_msg}\n\n{member.mention}")
+    
+    async def on_voice_state_update(self, member, before, after):
+        await voice_state_update(member, before, after)
     
     #! Do NOT handle Bot setup here, use setup_hook instead as it runs before bot start.
     async def on_ready(self):
