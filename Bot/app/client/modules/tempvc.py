@@ -51,7 +51,7 @@ class PromptView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
     
-    @discord.ui.button(label="Use Default", style=discord.ButtonStyle.green)
+    @discord.ui.button(label="Use Default", style=discord.ButtonStyle.green, custom_id="default_vc_btn")
     async def use_default(self, interaction: discord.Interaction, button: discord.ui.Button):
         if not await check_set(interaction.user.id):
             category = interaction.guild.get_channel(vc_cat)
@@ -64,7 +64,7 @@ class PromptView(discord.ui.View):
         await interaction.response.send_message("You already have a voice channel.")
     
     
-    @discord.ui.button(label="Configure", style=discord.ButtonStyle.blurple)
+    @discord.ui.button(label="Configure", style=discord.ButtonStyle.blurple, custom_id="config_vc_btn")
     async def configure_vc(self, interaction: discord.Interaction, button: discord.ui.Button):
         if not check_set(interaction.user.id):
             await interaction.response.send_modal(PromptModal())
