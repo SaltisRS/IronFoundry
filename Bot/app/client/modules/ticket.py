@@ -2,7 +2,7 @@ import discord
 from discord import app_commands
 
 ticket_archive = discord.Object(id=1007428258339504228)
-ticket_category = discord.Object(id=945058998158258257)
+ticket_category = discord.Object(id=1007422951617998928)
 tickets_role = 1348267270719148092
 
 rankup_message = """## :star2: Welcome to Iron Foundry :star2:
@@ -57,7 +57,7 @@ class TicketView(discord.ui.View):
         embed = discord.Embed(title="Ticket Created!", description="Your ticket has been created! Please wait for a staff member to assist you!", color=discord.Color.green())
         await interaction.response.send_message("Creating Ticket...", ephemeral=True, delete_after=5)
         guild = interaction.guild
-        ticket_channel = await guild.create_text_channel(name=f'ticket-{interaction.user}', category=ticket_category)
+        ticket_channel = await guild.create_text_channel(name=f'ticket-{interaction.user}', category=ticket_category, position=1)
         await ticket_channel.set_permissions(interaction.user, read_messages=True, send_messages=True)
         await ticket_channel.set_permissions(guild.get_role(tickets_role), read_messages=True, send_messages=True)
         await ticket_channel.send(f"{interaction.user.mention} {guild.get_role(tickets_role).mention}", embed=embed, view=InnerTicketView())
@@ -68,7 +68,7 @@ class TicketView(discord.ui.View):
         embed = discord.Embed(title="Ticket Created!", description="Your ticket has been created! Please wait for a staff member to assist you!", color=discord.Color.green())
         await interaction.response.send_message("Creating Ticket...", ephemeral=True, delete_after=5)
         guild = interaction.guild
-        ticket_channel = await guild.create_text_channel(name=f'rankup-{interaction.user}', category=ticket_category)
+        ticket_channel = await guild.create_text_channel(name=f'rankup-{interaction.user}', category=ticket_category, position=1)
         await ticket_channel.set_permissions(interaction.user, read_messages=True, send_messages=True)
         await ticket_channel.set_permissions(guild.get_role(tickets_role), read_messages=True, send_messages=True)
         await ticket_channel.send(f"{interaction.user.mention} {guild.get_role(tickets_role).mention}", embed=embed, view=InnerTicketView())
