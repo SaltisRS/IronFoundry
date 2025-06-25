@@ -12,6 +12,7 @@ from client.modules.ticket import ticket_setup
 from client.commands.system import setup as system_setup
 from client.modules.tempvc import voice_state_update
 from client.modules.tempvc import setup as tempvc_setup
+from client.commands.message_tags import setup as tag_setup
 
 
 join_msg = """### Welcome to Iron Foundry!
@@ -45,6 +46,7 @@ class DiscordClient(discord.Client):
         await ticket_setup(self, self.selected_guild)
         await system_setup(self, self.selected_guild)
         await tempvc_setup(self, self.selected_guild)
+        await tag_setup(self, self.selected_guild)
         result = await self.tree.sync(guild=self.selected_guild)
         logger.info(f"Commands loaded: {result}")
         

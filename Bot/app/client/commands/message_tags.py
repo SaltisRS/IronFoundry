@@ -39,3 +39,6 @@ async def mentee(interaction: discord.Interaction):
 async def upgrades(interaction: discord.Interaction):
     file = discord.File("Bot/app/client/assets/direct_upgrades.png")
     await interaction.response.send_message(file=file)
+    
+async def setup(client: discord.Client, guild):
+    client.tree.add_command(group, guild=guild)
