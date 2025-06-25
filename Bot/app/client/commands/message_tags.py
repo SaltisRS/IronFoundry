@@ -25,21 +25,21 @@ async def instructions(interaction: discord.Interaction):
 
 @group.command()
 async def requirements(interaction: discord.Interaction):
-    with open("Bot/app/client/assets/rank_reqs.png", "rb") as f:
+    with open("assets/rank_reqs.png", "rb") as f:
         file = discord.File(f)
     await interaction.response.send_message(file=file)
      
         
 @group.command()
 async def mentee(interaction: discord.Interaction):
-    with open("Bot/app/client/assets/mentee.png", "rb") as f:
+    with open("assets/mentee.png", "rb") as f:
         file = discord.File(f)
     await interaction.response.send_message(file=file)
     
     
 @group.command()
 async def upgrades(interaction: discord.Interaction):
-    with open("Bot/app/client/assets/direct_upgrades.png", "rb") as f:
+    with open("assets/direct_upgrades.png", "rb") as f:
         file = discord.File(f)
     await interaction.response.send_message(file=file)
     
