@@ -3,7 +3,7 @@ anyio==4.7.0
 click==8.1.8
 colorama==0.4.6
 fastapi==0.115.6
-h11==0.14.0
+h11==0.16.0
 httptools==0.6.4
 idna==3.10
 loguru==0.7.3
