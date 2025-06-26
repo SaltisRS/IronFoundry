@@ -58,6 +58,7 @@ class TicketView(discord.ui.View):
         await interaction.response.send_message("Creating Ticket...", ephemeral=True, delete_after=5)
         guild = interaction.guild
         ticket_channel = await guild.create_text_channel(name=f'ticket-{interaction.user}', category=ticket_category, position=1)
+        await ticket_channel.set_permissions(guild.default_role, read_message=False, send_message=False)
         await ticket_channel.set_permissions(interaction.user, read_messages=True, send_messages=True)
         await ticket_channel.set_permissions(guild.get_role(tickets_role), read_messages=True, send_messages=True)
         await ticket_channel.send(f"{interaction.user.mention} {guild.get_role(tickets_role).mention}", embed=embed, view=InnerTicketView())
@@ -69,6 +70,7 @@ class TicketView(discord.ui.View):
         await interaction.response.send_message("Creating Ticket...", ephemeral=True, delete_after=5)
         guild = interaction.guild
         ticket_channel = await guild.create_text_channel(name=f'rankup-{interaction.user}', category=ticket_category, position=1)
+        await ticket_channel.set_permissions(guild.default_role, read_message=False, send_message=False)
         await ticket_channel.set_permissions(interaction.user, read_messages=True, send_messages=True)
         await ticket_channel.set_permissions(guild.get_role(tickets_role), read_messages=True, send_messages=True)
         await ticket_channel.send(f"{interaction.user.mention} {guild.get_role(tickets_role).mention}", embed=embed, view=InnerTicketView())
