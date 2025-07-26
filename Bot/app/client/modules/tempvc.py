@@ -22,10 +22,14 @@ def add_active_channel(channel: discord.VoiceChannel, user_id: int):
 
 def remove_active_channel(user_id: int):
     active_channels.pop(user_id, None)
+    
+async def set_permissions(channel: discord.VoiceChannel, user: discord.Member):
+    await channel.set_permissions(target=channel.guild.default_role, join_channel=False, view_channel=False)
+    await channel.set_permissions(target=user, join_channel=True, view_channel=True, create_invite=True, move_members=True)
 
 
 async def self_destruct(channel: discord.VoiceChannel, user_id: int):
-    await asyncio.sleep(600)
+    await asyncio.sleep(300)
     if await is_empty(channel):
         try:
             await channel.delete(reason="Temp VC timed out")
@@ -38,14 +42,20 @@ class PromptModal(discord.ui.Modal, title="VC Settings"):
     name = discord.ui.TextInput(
         label="Set a name for the channel",
         required=False,
-        max_length=20,
-        placeholder="max 20 chars."
+        max_length=30,
+        placeholder="max 30 chars."
     )
     limit = discord.ui.TextInput(
         label="Limit the amount of people who can join",
         required=False,
         max_length=2,
         placeholder="Leave blank or '0' for unlimited"
+    )
+    hidden = discord.ui.TextInput(
+        label="Show/Hide channel from channel list",
+        required=False,
+        max_length=1,
+        placeholder="0 Show | 1 Hidden, default 0"
     )
 
     async def on_submit(self, interaction: discord.Interaction):
@@ -55,8 +65,10 @@ class PromptModal(discord.ui.Modal, title="VC Settings"):
             if self.limit.value:
                 try:
                     user_limit = int(self.limit.value)
-                    if user_limit < 0 or user_limit > 99:
+                    if user_limit < 0:
                         user_limit = 0
+                    elif user_limit > 99:
+                        user_limit = 99
                 except ValueError:
                     user_limit = 0
 
@@ -67,15 +79,25 @@ class PromptModal(discord.ui.Modal, title="VC Settings"):
                 user_limit=user_limit if user_limit > 0 else None,
                 position=1
             )
+            if self.hidden.value == None:
+                self.hidden.value = str(0)
             
             add_active_channel(channel, interaction.user.id)
             
+            if self.hidden.value == 1:
+                await set_permissions(channel, interaction.user)
+            
             await interaction.response.send_message(
                 f"Created channel: **{channel.name}**\n"
-                f"Limit: {'Unlimited' if user_limit == 0 else user_limit}",
+                f"Limit: {'Unlimited' if user_limit == 0 else user_limit}\n"
+                f"Hidden: {'Shown' if self.hidden.value == 0 else 'Hidden'}",
                 ephemeral=True,
                 delete_after=10
             )
+            
+            if self.hidden.value == 1:
+                invite = await channel.create_invite()
+                await interaction.followup.send(f"**Voice Chat Invite URL**\n{invite.url}")
             asyncio.create_task(self_destruct(channel, interaction.user.id))
             
         except Exception as e:

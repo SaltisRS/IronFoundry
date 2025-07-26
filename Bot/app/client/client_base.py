@@ -69,7 +69,6 @@ class DiscordClient(discord.Client):
     async def on_voice_state_update(self, member, before, after):
         await voice_state_update(member, before, after)
     
-    #! Do NOT handle Bot setup here, use setup_hook instead as it runs before bot start.
     async def on_ready(self):
         logger.info(f"Bot is ready as {self.user} at {datetime.now()}")
 

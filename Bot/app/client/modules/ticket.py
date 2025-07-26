@@ -6,7 +6,7 @@ ticket_category = discord.Object(id=1007422951617998928)
 tickets_role = 1348267270719148092
 
 rankup_message = """## :star2: Welcome to Iron Foundry :star2:
-We are a PVM focused clan with over 270 members. Whether you're a seasoned raider, just dipping your toes into PvM, or simply want to have people to socialize with during your never-ending grind, there’s a place for you here. 
+We are a PVM focused clan with over 300 members. Whether you're a seasoned raider, just dipping your toes into PvM, or simply want to have people to socialize with during your never-ending grind, there’s a place for you here. 
 
 __**Here are some important channels to be aware of**__
 - #🤝-rank-structure
