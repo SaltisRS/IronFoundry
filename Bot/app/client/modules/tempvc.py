@@ -84,20 +84,27 @@ class PromptModal(discord.ui.Modal, title="VC Settings"):
             
             add_active_channel(channel, interaction.user.id)
             
-            if self.hidden.value == 1:
-                await set_permissions(channel, interaction.user)
-            
+            if self.hidden.value == "1":
+                try:
+                    await set_permissions(channel, interaction.user)
+                except Exception as e:
+                    logger.error(e)
+                    
             await interaction.response.send_message(
                 f"Created channel: **{channel.name}**\n"
                 f"Limit: {'Unlimited' if user_limit == 0 else user_limit}\n"
-                f"Hidden: {'Shown' if self.hidden.value == 0 else 'Hidden'}",
+                f"Hidden: {'Shown' if self.hidden.value == "0" else 'Hidden'}",
                 ephemeral=True,
                 delete_after=10
             )
             
-            if self.hidden.value == 1:
-                invite = await channel.create_invite()
-                await interaction.followup.send(f"**Voice Chat Invite URL**\n{invite.url}")
+            if self.hidden.value == "1":
+                try:
+                    invite = await channel.create_invite()
+                    await interaction.followup.send(f"**Voice Chat Invite URL**\n{invite.url}")
+                except Exception as e:
+                    logger.error(e)
+                    
             asyncio.create_task(self_destruct(channel, interaction.user.id))
             
         except Exception as e:
