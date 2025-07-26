@@ -24,9 +24,8 @@ def remove_active_channel(user_id: int):
     active_channels.pop(user_id, None)
     
 async def set_permissions(channel: discord.VoiceChannel, user: discord.Member):
-    await channel.set_permissions(target=channel.guild.default_role, join_channel=False, view_channel=False)
-    await channel.set_permissions(target=user, join_channel=True, view_channel=True, create_invite=True, move_members=True)
-
+    await channel.set_permissions(target=channel.guild.default_role, connect=False, view_channel=False)
+    await channel.set_permissions(target=user, connect=True, view_channel=True, create_instant_invite=True, move_members=True)
 
 async def self_destruct(channel: discord.VoiceChannel, user_id: int):
     await asyncio.sleep(300)
@@ -101,7 +100,7 @@ class PromptModal(discord.ui.Modal, title="VC Settings"):
             if self.hidden.value == "1":
                 try:
                     invite = await channel.create_invite()
-                    await interaction.followup.send(f"**Voice Chat Invite URL**\n{invite.url}")
+                    await interaction.followup.send(f"**Voice Chat Invite URL**\n{invite.url}", ephemeral=True)
                 except Exception as e:
                     logger.error(e)
                     
