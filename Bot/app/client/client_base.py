@@ -18,7 +18,7 @@ from client.modules.ticket_tracker import last_activity, warned, ticket_archive,
 
 
 join_msg = """### Welcome to Iron Foundry!
-Head on over to #💬-speak-to-staff and create a **Rank Up** ticket to be ranked and invited into the cc!"""
+Head on over to #💬-speak-to-staff and click "Join CC" to create a ticket to be ranked and invited into the cc!"""
 
 async def ticket_cleanup_task(client: discord.Client):
     await client.wait_until_ready()
