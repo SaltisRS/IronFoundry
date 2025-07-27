@@ -204,24 +204,24 @@ async def send_tempvc_msg(interaction: discord.Interaction):
 @app_commands.command()
 async def vc_inv(interaction: discord.Interaction, user: discord.Member):
     if not has_active_channel(interaction.user.id):
-        await interaction.response.send_message("You need to create a Temp VC to use this command.")
+        await interaction.response.send_message("You need to create a custom Voice Channel to use this command.", ephemeral=True, delete_after=5)
+        return
+    vc = await interaction.user.fetch_voice()
+    if vc == discord.NotFound:
+        await interaction.response.send_message("You must be in a custom Voice Channel to use this command.", ephemeral=True, delete_after=5)
         return
     
-    if not interaction.user.voice.channel:
-        await interaction.response.send_message("You must be in a custom Voice Channel to use this command.")
+    if not is_users_channel(vc.channel, interaction.user):
+        await interaction.response.send_message("You must be in your own custom Voice Channel to use this command.", ephemeral=True, delete_after=5)
         return
     
-    current_channel = interaction.user.voice.channel
-    
-    if not is_users_channel(current_channel, interaction.user):
-        await interaction.response.send_message("You must be in your own custom VC to use this command.")
-        return
-    
-    await set_invite_permissions(current_channel, user)
+    await set_invite_permissions(vc.channel, user)
     try:
-        await user.send(f"You have been invited to join: {current_channel.name}\n{current_channel.jump_url}")
+        await user.send(f"You have been invited to join: {vc.channel.name}\n{vc.channel.jump_url}")
     except Exception as e:
         logger.error(f"Couldnt Message User\n{e}")
+    
+    await interaction.response.send_message(f"Invited: {user.display_name}", ephemeral=True, delete_after=5)
 
 async def setup(client: discord.Client, guild: discord.Guild):
     client.tree.add_command(send_tempvc_msg, guild=guild)
