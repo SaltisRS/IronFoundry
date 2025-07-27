@@ -62,13 +62,13 @@ async def send_clan_chats(
     entries: List[ChatEntry] = []
     
     logger.info(data)
-    for key, value in data.items():
+    """ for key, value in data.items():
         if key.isdigit():
             try:
                 entry = ChatEntry.model_validate(value)
                 entries.append(entry)
             except Exception as e:
-                logger.error(f"Failed to parse entry at index {key}: {e}")
+                logger.error(f"Failed to parse entry at index {key}: {e}") """
 
     new_entries = []
     for entry in entries:
