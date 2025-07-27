@@ -51,24 +51,11 @@ async def websocket_endpoint(websocket: WebSocket):
 
 @app.post("/send")
 async def send_clan_chats(
-    request: Request,
-    verification_code: str = Header(..., alias="verification-code")):
-    
+    entries: List[ChatEntry],
+    verification_code: str = Header(..., alias="verification-code")
+):
     if verification_code != VERIFICATION_CODE:
         raise HTTPException(status_code=403, detail="Invalid verification code")
-
-    data = await request.json()
-    
-    entries: List[ChatEntry] = []
-    
-    logger.info(data)
-    """ for key, value in data.items():
-        if key.isdigit():
-            try:
-                entry = ChatEntry.model_validate(value)
-                entries.append(entry)
-            except Exception as e:
-                logger.error(f"Failed to parse entry at index {key}: {e}") """
 
     new_entries = []
     for entry in entries:
