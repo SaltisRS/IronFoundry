@@ -11,29 +11,27 @@ services:
     depends_on:
       Redis:
         condition: service_healthy
-      #api:
-        #condition: service_started
     env_file:
       - .env
 
   
-  #api:
-    #container_name: if-api
-    #build:
-      #./Api
-    #ports:
-      #- 5050:80
-      #- 4040:80
-    #volumes:
-      #- ./Api:/app
-      #- pip-cache:/root/.cache/pip
-    #networks:
-      #- app-network
-    #depends_on:
-      #Redis:
-        #condition: service_healthy
-    #env_file:
-      #- .env
+  chat:
+    container_name: if-chat
+    build:
+      ./Chat
+    volumes:
+      - ./Chat:/app
+      - pip-cache:/root/.cache/pip
+    networks:
+      - app-network
+    env_file:
+      - .env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.chat.rule=Host(`chat.ironfoundry.cc`)"
+      - "traefik.http.routers.chat.entrypoints=websecure"
+      - "traefik.http.routers.chat.tls.certresolver=cloudflare"
+      - "traefik.http.services.chat.loadbalancer.server.port=80"
   
 
   Redis:
@@ -54,24 +52,6 @@ services:
     volumes:
       - redis-data:/data
   
-  lavalink:
-    image: ghcr.io/lavalink-devs/lavalink:4
-    container_name: lavalink
-    restart: unless-stopped
-    environment:
-      - _JAVA_OPTIONS=-Xmx6G
-      - SERVER_PORT=2333
-    networks:
-      - app-network
-    expose:
-      - 2333
-    volumes:
-      # mount application.yml from the same directory or use environment variables
-      - ./application.yml:/opt/Lavalink/application.yml
-      # persist plugins between restarts, make sure to set the correct permissions (user: 322, group: 322)
-      - ./plugins/:/opt/Lavalink/plugins/
-
-
 
 networks:
   app-network:

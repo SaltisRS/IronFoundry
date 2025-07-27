@@ -1,7 +1,6 @@
-FROM python:3.13.1-slim
+FROM python:3.13-alpine
 
 WORKDIR /Bot
-
 
 COPY requirements.txt .
 
