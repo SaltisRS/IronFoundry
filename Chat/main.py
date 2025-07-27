@@ -51,7 +51,7 @@ async def websocket_endpoint(websocket: WebSocket):
         connected_clients.remove(websocket)
 
 
-@app.post("/send")
+@app.get("/send")
 async def send_clan_chats(
     entries: List[ChatPayload],
     verification_code: str = Header(..., alias="verification-code")
