@@ -39,9 +39,12 @@ async def websocket_endpoint(websocket: WebSocket):
     # Send connected message on connect
     connected_message = {
         "message_type": "ToClanChat",
-        "message": "Connected to IF Chat",
-        "sender": "System"
+        "message": {
+            "sender": "System",
+            "message": "Connected to IF Chat"
+        }
     }
+
     await websocket.send_json(connected_message)
 
     try:
