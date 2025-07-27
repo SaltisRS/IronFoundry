@@ -3,6 +3,7 @@ from typing import List, Dict, Any, Optional
 from pydantic import BaseModel
 from cachetools import TTLCache
 import asyncio
+from loguru import logger
 
 app = FastAPI(debug=True)
 
@@ -54,7 +55,7 @@ async def websocket_endpoint(websocket: WebSocket):
         connected_clients.remove(websocket)
 
 
-@app.get("/send")
+""" @app.get("/send")
 async def send_clan_chats(
     entries: List[ChatPayload],
     verification_code: str = Header(..., alias="verification-code")
@@ -74,8 +75,12 @@ async def send_clan_chats(
     for entry in new_entries:
         asyncio.create_task(forward_to_discord_bot(entry))
 
-    return {"received": len(entries), "forwarded": len(new_entries)}
+    return {"received": len(entries), "forwarded": len(new_entries)} """
 
+@app.get("/send")
+async def test_send(entries: Any):
+    logger.info(entries)
+    return 200
 
 
 @app.post("/publish")
