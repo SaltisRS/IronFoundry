@@ -3,9 +3,6 @@ FROM python:3.13-alpine
 
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y build-essential && apt-get clean
-
 COPY requirements.txt .
 
 RUN pip install --upgrade pip && \
