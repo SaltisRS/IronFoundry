@@ -61,6 +61,7 @@ async def send_clan_chats(
     
     entries: List[ChatEntry] = []
     
+    logger.info(data)
     for key, value in data.items():
         if key.isdigit():
             try:
