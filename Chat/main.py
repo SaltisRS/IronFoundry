@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from cachetools import TTLCache
 import asyncio
 
-app = FastAPI()
+app = FastAPI(debug=True)
 
 VERIFICATION_CODE = "IF"
 
