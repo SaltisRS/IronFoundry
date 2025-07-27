@@ -7,7 +7,7 @@ services:
       - ./Bot:/app
       - pip-cache:/root/.cache/pip
     networks:
-      - app-network
+      - traefik-shared
     depends_on:
       Redis:
         condition: service_healthy
@@ -23,7 +23,7 @@ services:
       - ./Chat:/app
       - pip-cache:/root/.cache/pip
     networks:
-      - app-network
+      - traefik-shared
     env_file:
       - .env
     labels:
@@ -48,14 +48,14 @@ services:
       start_period: 30s
       timeout: 10s
     networks:
-      - app-network
+      - traefik-shared
     volumes:
       - redis-data:/data
   
 
 networks:
-  app-network:
-    driver: bridge
+  traefik-shared:
+    external: true
 
 volumes:
   redis-data:
