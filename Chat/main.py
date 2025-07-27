@@ -109,4 +109,4 @@ async def discord_to_runelite(
 async def forward_to_discord_bot(entry: ChatEntry):
     # TODO: Implement actual forwarding here.
     #   await httpx.post("https://discordbot/api/send", json=chat_payload.dict())
-    print(f"Forwarding to Discord bot: {ChatEntry}")
+    print(f"Forwarding to Discord bot: {entry.__repr__()}")
