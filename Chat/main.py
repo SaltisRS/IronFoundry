@@ -77,7 +77,7 @@ async def send_clan_chats(
 
     return {"received": len(entries), "forwarded": len(new_entries)} """
 
-@app.post("/send")
+@app.get("/send")
 async def test_send_endpoint(request: Request):
     data = await request.json()
     print("Received payload:", data)
