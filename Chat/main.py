@@ -1,4 +1,4 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Header, HTTPException
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Header, HTTPException, Request
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel
 from cachetools import TTLCache
@@ -77,10 +77,11 @@ async def send_clan_chats(
 
     return {"received": len(entries), "forwarded": len(new_entries)} """
 
-@app.get("/send")
-async def test_send(entries: Any):
-    logger.info(entries)
-    return 200
+@app.post("/send")
+async def test_send_endpoint(request: Request):
+    data = await request.json()
+    print("Received payload:", data)
+    return {"status": "received", "payload": data}
 
 
 @app.post("/publish")
