@@ -2,7 +2,7 @@ import discord
 from discord import app_commands
 
 ticket_archive = discord.Object(id=1007428258339504228)
-ticket_category = discord.Object(id=1007422951617998928)
+ticket_category = discord.Object(id=1399026259350130688)
 tickets_role = 1348267270719148092
 
 rankup_message = """## :star2: Welcome to Iron Foundry :star2:
@@ -70,6 +70,19 @@ class TicketView(discord.ui.View):
         await interaction.response.send_message("Creating Ticket...", ephemeral=True, delete_after=5)
         guild = interaction.guild
         ticket_channel = await guild.create_text_channel(name=f'rankup-{interaction.user}', category=ticket_category, position=1)
+        await ticket_channel.set_permissions(guild.default_role, read_messages=False, send_messages=False)
+        await ticket_channel.set_permissions(interaction.user, read_messages=True, send_messages=True)
+        await ticket_channel.set_permissions(guild.get_role(tickets_role), read_messages=True, send_messages=True)
+        await ticket_channel.send(f"{interaction.user.mention} {guild.get_role(tickets_role).mention}", embed=embed, view=InnerTicketView())
+        await ticket_channel.send(rankup_message)
+    
+    
+    @discord.ui.button(label='Join CC', style=discord.ButtonStyle.green, custom_id="join_ticket")
+    async def join_ticket(self, interaction: discord.Interaction, button: discord.ui.Button):
+        embed = discord.Embed(title="Ticket Created!", description="Your ticket has been created! Please wait for a staff member to assist you!", color=discord.Color.green())
+        await interaction.response.send_message("Creating Ticket...", ephemeral=True, delete_after=5)
+        guild = interaction.guild
+        ticket_channel = await guild.create_text_channel(name=f'new_member-{interaction.user}', category=ticket_category, position=1)
         await ticket_channel.set_permissions(guild.default_role, read_messages=False, send_messages=False)
         await ticket_channel.set_permissions(interaction.user, read_messages=True, send_messages=True)
         await ticket_channel.set_permissions(guild.get_role(tickets_role), read_messages=True, send_messages=True)

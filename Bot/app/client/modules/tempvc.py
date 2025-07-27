@@ -206,11 +206,9 @@ async def vc_inv(interaction: discord.Interaction, user: discord.Member):
     if not has_active_channel(interaction.user.id):
         await interaction.response.send_message("You need to create a custom Voice Channel to use this command.", ephemeral=True, delete_after=5)
         return
-    vc = await interaction.user.fetch_voice()
-    if vc == discord.NotFound:
-        await interaction.response.send_message("You must be in a custom Voice Channel to use this command.", ephemeral=True, delete_after=5)
-        return
     
+    vc = await interaction.user.fetch_voice()
+
     if not is_users_channel(vc.channel, interaction.user):
         await interaction.response.send_message("You must be in your own custom Voice Channel to use this command.", ephemeral=True, delete_after=5)
         return

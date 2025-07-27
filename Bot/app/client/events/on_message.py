@@ -2,9 +2,10 @@ import discord
 import re
 from cachetools import TTLCache, cached
 from loguru import logger
-
+from datetime import datetime
 
 from ..modules.mongo import MongoClient
+from ..modules.ticket_tracker import last_activity, warned, ticket_category, ticket_origin
 
 
 client = MongoClient()
@@ -46,3 +47,8 @@ async def handle_message(client: discord.Client, message: discord.Message):
         await message.author.send(embed=discord.Embed(title="Non whitelisted Discord Link.", description=f"Your message contained a link that is not whitelisted. Please remove the following link(s) and try again.: {link_check}", color=discord.Color.red()))
         await message.delete()
         return
+    if message.channel.category_id == ticket_category.id and not message.channel.id == ticket_origin.id:
+        last_activity[message.channel.id] = datetime.now()
+        if message.channel.id in warned:
+            warned.remove(message.channel.id)
+            
