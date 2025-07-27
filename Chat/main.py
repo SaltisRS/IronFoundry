@@ -4,7 +4,7 @@ from pydantic import BaseModel
 import asyncio
 import uuid
 
-from Chat.chat_server import ChatServer, Connect, Disconnect, BroadcastFromClient, BroadcastFromDiscord
+from chat_server import ChatServer, Connect, Disconnect, BroadcastFromClient, BroadcastFromDiscord
 
 ALLOWED_CODE = "IF"
 chat_server = ChatServer(allowed_code=ALLOWED_CODE)
