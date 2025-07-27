@@ -11,21 +11,24 @@ active_channels: dict[int, int] = {}
 async def is_empty(channel: discord.VoiceChannel) -> bool:
     return len(channel.members) == 0
 
-
 def has_active_channel(user_id: int) -> bool:
     return user_id in active_channels
 
+def is_users_channel(channel: discord.VoiceChannel, user: discord.Member):
+    return active_channels[user.id] == channel.id
 
 def add_active_channel(channel: discord.VoiceChannel, user_id: int):
     active_channels[user_id] = channel.id
 
-
 def remove_active_channel(user_id: int):
     active_channels.pop(user_id, None)
+
+async def set_invite_permissions(channel: discord.VoiceChannel, invited: discord.Member):
+    await channel.set_permissions(target=invited, view_channel=True, connect=True)
     
 async def set_permissions(channel: discord.VoiceChannel, user: discord.Member):
     await channel.set_permissions(target=channel.guild.default_role, connect=False, view_channel=False)
-    await channel.set_permissions(target=user, connect=True, view_channel=True, create_instant_invite=True, move_members=True)
+    await channel.set_permissions(target=user, connect=True, view_channel=True, move_members=True)
 
 async def self_destruct(channel: discord.VoiceChannel, user_id: int):
     await asyncio.sleep(300)
@@ -92,18 +95,12 @@ class PromptModal(discord.ui.Modal, title="VC Settings"):
             await interaction.response.send_message(
                 f"Created channel: **{channel.name}**\n"
                 f"Limit: {'Unlimited' if user_limit == 0 else user_limit}\n"
-                f"Hidden: {'Shown' if self.hidden.value == "0" else 'Hidden'}",
+                f"Hidden: {'Shown' if self.hidden.value == "0" else 'Hidden'}"
+                f"Use /vc_inv @member to invite people to the vc",
                 ephemeral=True,
                 delete_after=10
             )
-            
-            if self.hidden.value == "1":
-                try:
-                    invite = await channel.create_invite()
-                    await interaction.followup.send(f"**Voice Chat Invite URL**\n{invite.url}", ephemeral=True)
-                except Exception as e:
-                    logger.error(e)
-                    
+
             asyncio.create_task(self_destruct(channel, interaction.user.id))
             
         except Exception as e:
@@ -204,7 +201,29 @@ async def send_tempvc_msg(interaction: discord.Interaction):
         view=view
     )
 
+@app_commands.command()
+async def vc_inv(interaction: discord.Interaction, user: discord.Member):
+    if not has_active_channel(interaction.user.id):
+        await interaction.response.send_message("You need to create a Temp VC to use this command.")
+        return
+    
+    if not interaction.user.voice.channel:
+        await interaction.response.send_message("You must be in a custom Voice Channel to use this command.")
+        return
+    
+    current_channel = interaction.user.voice.channel
+    
+    if not is_users_channel(current_channel, interaction.user):
+        await interaction.response.send_message("You must be in your own custom VC to use this command.")
+        return
+    
+    await set_invite_permissions(current_channel, user)
+    try:
+        await user.send(f"You have been invited to join: {current_channel.name}\n{current_channel.jump_url}")
+    except Exception as e:
+        logger.error(f"Couldnt Message User\n{e}")
 
 async def setup(client: discord.Client, guild: discord.Guild):
     client.tree.add_command(send_tempvc_msg, guild=guild)
+    client.tree.add_command(vc_inv, guild=guild)
     client.add_view(PromptView())
