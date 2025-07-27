@@ -1,53 +1,104 @@
-from typing import AsyncGenerator
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Header, HTTPException
+from typing import List, Dict, Any, Optional
 from pydantic import BaseModel
+from cachetools import TTLCache
 import asyncio
-import uuid
 
-from chat_server import ChatServer, Connect, Disconnect, BroadcastFromClient, BroadcastFromDiscord
+app = FastAPI()
 
-ALLOWED_CODE = "IF"
-chat_server = ChatServer(allowed_code=ALLOWED_CODE)
+VERIFICATION_CODE = "IF"
 
-async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+connected_clients: List[WebSocket] = []
 
-    run_task = asyncio.create_task(chat_server.run())
-    yield
+message_cache = TTLCache(maxsize=512, ttl=60)
 
-    await chat_server.shutdown()
-    run_task.cancel()
-    try:
-        await run_task
-    except asyncio.CancelledError:
-        pass
-
-app = FastAPI(lifespan=lifespan)
+class ChatPayload(BaseModel):
+    clanName: str
+    sender: str
+    message: str
+    rank: Optional[str] = None
+    iconId: Optional[int] = None
+    isLeagueWorld: Optional[bool] = False
 
 
-@app.websocket("/connect")
-async def websocket_endpoint(websocket: WebSocket, verification_code: str):
+class WebSocketMessage(BaseModel):
+    message_type: str
+    message: Dict[str, Any]
+
+def make_message_key(payload: ChatPayload) -> str:
+    return f"{payload.clanName}:{payload.sender}:{payload.message}"
+
+
+# --- WebSocket endpoint for Runelite clients to connect to receive messages ---
+
+@app.websocket("/recieve")
+async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
-    conn_id = str(uuid.uuid4())
-    await chat_server.cmd_queue.put(Connect(conn_id, websocket, verification_code))
+    connected_clients.append(websocket)
+
+    # Send connected message on connect
+    connected_message = {
+        "message_type": "ToClanChat",
+        "message": "Connected to IF Chat",
+        "sender": "System"
+    }
+    await websocket.send_json(connected_message)
 
     try:
         while True:
-            data = await websocket.receive_text()
-            await chat_server.cmd_queue.put(BroadcastFromClient(conn_id, data))
+            await websocket.receive_text()
     except WebSocketDisconnect:
-        await chat_server.cmd_queue.put(Disconnect(conn_id))
+        connected_clients.remove(websocket)
 
 
-class DiscordPayload(BaseModel):
-    sender: str
-    message: str
-    code: str
+@app.post("/send")
+async def send_clan_chats(
+    entries: List[ChatPayload],
+    verification_code: str = Header(..., alias="verification-code")
+):
+    if verification_code != VERIFICATION_CODE:
+        raise HTTPException(status_code=403, detail="Invalid verification code")
+
+    new_entries = []
+
+    for entry in entries:
+        key = make_message_key(entry)
+        if key in message_cache:
+            continue
+        message_cache[key] = True
+        new_entries.append(entry)
+
+    for entry in new_entries:
+        asyncio.create_task(forward_to_discord_bot(entry))
+
+    return {"received": len(entries), "forwarded": len(new_entries)}
+
 
 
 @app.post("/publish")
-async def send_discord_message(payload: DiscordPayload):
-    if payload.code != ALLOWED_CODE:
+async def discord_to_runelite(
+    payload: WebSocketMessage,
+    verification_code: str = Header(..., alias="verification-code")
+):
+    if verification_code != VERIFICATION_CODE:
         raise HTTPException(status_code=403, detail="Invalid verification code")
 
-    await chat_server.cmd_queue.put(BroadcastFromDiscord(payload.sender, payload.message, payload.code))
-    return {"status": "ok"}
+    disconnected = []
+    for ws in connected_clients:
+        try:
+            await ws.send_json(payload.model_dump())
+        except Exception:
+            disconnected.append(ws)
+
+    for ws in disconnected:
+        connected_clients.remove(ws)
+
+    return {"status": "broadcasted", "clients": len(connected_clients)}
+
+
+# --- Stub: forward message to Discord bot ---
+
+async def forward_to_discord_bot(chat_payload: ChatPayload):
+    # TODO: Implement actual forwarding here.
+    #   await httpx.post("https://discordbot/api/send", json=chat_payload.dict())
+    print(f"Forwarding to Discord bot: {chat_payload}")
