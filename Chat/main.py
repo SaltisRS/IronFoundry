@@ -56,7 +56,7 @@ async def send_clan_chats(
 ):
     if verification_code != VERIFICATION_CODE:
         raise HTTPException(status_code=403, detail="Invalid verification code")
-
+    logger.info(entries)
     new_entries = []
     for entry in entries:
         key = f"{entry.clan_name}:{entry.sender}:{entry.message}"
@@ -69,6 +69,10 @@ async def send_clan_chats(
         asyncio.create_task(forward_to_discord_bot(entry))
 
     return {"received": len(entries), "forwarded": len(new_entries)}
+
+@app.get("/send")
+async def respond_heartbeat():
+    return {"status": "OK"}
 
 
 @app.post("/publish")
