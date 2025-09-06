@@ -30,7 +30,9 @@ async def ticket_cleanup_task(client: discord.Client):
             if not channel:
                 continue
 
-            # 22-hour warning
+            if channel.name.startswith("application-"):
+                continue
+            
             if (now - last_time >= timedelta(hours=22)) and channel_id not in warned:
                 try:
                     await channel.send(
@@ -87,8 +89,7 @@ class DiscordClient(discord.Client):
         result = await self.tree.sync(guild=self.selected_guild)
         logger.info(f"Commands loaded: {result}")
         
-        
-    # Setup for Redis and other services/modules
+
     async def setup_hook(self):
         await self.redis_client.connect()
         await self.set_guild()
