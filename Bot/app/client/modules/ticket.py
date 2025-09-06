@@ -4,6 +4,7 @@ from discord import app_commands
 ticket_archive = discord.Object(id=1007428258339504228)
 ticket_category = discord.Object(id=1399026259350130688)
 tickets_role = 1348267270719148092
+senior_role = 999088527876833360
 
 rankup_message = """## :star2: Welcome to Iron Foundry :star2:
 We are a PVM focused clan with over 300 members. Whether you're a seasoned raider, just dipping your toes into PvM, or simply want to have people to socialize with during your never-ending grind, there’s a place for you here. 
@@ -88,9 +89,24 @@ class TicketView(discord.ui.View):
         await ticket_channel.set_permissions(guild.get_role(tickets_role), read_messages=True, send_messages=True)
         await ticket_channel.send(f"{interaction.user.mention} {guild.get_role(tickets_role).mention}", embed=embed, view=InnerTicketView())
         await ticket_channel.send(rankup_message)
+    
+    @discord.ui.button(label="Apply for Legend/Moderator", style=discord.ButtonStyle.green, custom_id="legend-mod")
+    async def apply_ticket(self, interaction: discord.Interaction, button: discord.ui.Button):
+        embed = discord.Embed(title="Ticket Created!", description="Your ticket has been created! Please wait for a staff member to assist you!", color=discord.Color.green())
+        await interaction.response.send_message("Creating Ticket...", ephemeral=True, delete_after=5)
+        guild = interaction.guild
+        ticket_channel = await guild.create_text_channel(name=f'application-{interaction.user}', category=ticket_category, position=1)
+        await ticket_channel.set_permissions(guild.default_role, read_messages=False, send_messages=False)
+        await ticket_channel.set_permissions(interaction.user, read_messages=True, send_messages=True)
+        await ticket_channel.set_permissions(guild.get_role(senior_role), read_messages=True, send_messages=True)
+        await ticket_channel.send(f"{interaction.user.mention} {guild.get_role(senior_role).mention}", embed=embed, view=InnerTicketView())
 
+        
 @app_commands.command()
 async def send_ticket_view(interaction: discord.Interaction):
+    if not interaction.user.guild_permissions.administrator:
+        await interaction.response.send_message("Missing Permissions")
+        return
     embed = discord.Embed(title="Open a ticket!", description="Click below to open a ticket!", color=discord.Color.blurple())
     view = TicketView()
     await interaction.response.send_message(embed=embed, view=view)
