@@ -90,7 +90,7 @@ class TicketView(discord.ui.View):
         await ticket_channel.send(f"{interaction.user.mention} {guild.get_role(tickets_role).mention}", embed=embed, view=InnerTicketView())
         await ticket_channel.send(rankup_message)
     
-    @discord.ui.button(label="Apply for Legend/Moderator", style=discord.ButtonStyle.green, custom_id="legend-mod")
+    @discord.ui.button(label="Apply for Legend/Moderator", style=discord.ButtonStyle.gray, custom_id="legend-mod", row=1)
     async def apply_ticket(self, interaction: discord.Interaction, button: discord.ui.Button):
         embed = discord.Embed(title="Ticket Created!", description="Your ticket has been created! Please wait for a staff member to assist you!", color=discord.Color.green())
         await interaction.response.send_message("Creating Ticket...", ephemeral=True, delete_after=5)
