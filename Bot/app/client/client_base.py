@@ -113,7 +113,7 @@ class DiscordClient(discord.Client):
             for member in _role.members:
                 if member.status != discord.Status.offline:
                     online.add(member)
-        await chnl.send(f"Online staff/legends while {before.name} was moved.\n{[member.mention for member in online]}")
+        await chnl.send(f"Online staff/legends while {before.name} was moved.\n{[member.mention for member in online]}", silent=True)
             
     
     async def on_member_join(self, member: discord.Member):
