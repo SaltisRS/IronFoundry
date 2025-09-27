@@ -17,6 +17,9 @@ from client.commands.message_tags import setup as tag_setup
 from client.modules.ticket_tracker import last_activity, warned, ticket_archive, ticket_origin
 
 
+channels_to_track = [1386299832196399217, 1088090554216235019, 1386299925641433198]
+staff_roles = [965399119021617162, 965402001066299424]
+
 join_msg = """### Welcome to Iron Foundry!
 Head on over to #💬-speak-to-staff and click "Join CC" to create a ticket to be ranked and invited into the cc!"""
 
@@ -96,7 +99,22 @@ class DiscordClient(discord.Client):
         await self.load_commands()
     
     async def on_message(self, message: discord.Message):
-        await handle_message(self, message)    
+        await handle_message(self, message)
+    
+    async def on_guild_channel_update(self, before: discord.abc.GuildChannel, after: discord.abc.GuildChannel):
+        if before.position == after.position:
+            return
+        if before.id not in channels_to_track:
+            return
+        chnl = after.guild.get_channel(1386299925641433198)
+        online: set[discord.Member] = set()
+        for role in staff_roles:
+            _role = after.guild.get_role(role)
+            for member in _role.members:
+                if member.status != discord.Status.offline:
+                    online.add(member)
+        await chnl.send(f"Online staff/legends while {before.name} was moved.\n{[member.mention + " \n" for member in online]}")
+            
     
     async def on_member_join(self, member: discord.Member):
         general = self.get_channel(945052365873090652)
