@@ -7,4 +7,3 @@ class Bingo(Group):
         """
         Bingo commands group, parent command group for all bingo commands.
         """
-        

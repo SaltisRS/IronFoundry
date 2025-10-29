@@ -16,6 +16,7 @@ _instructions = """
 5. In that same tab, click "Settings" and then click "Apply" and wait for one of the moderators to accept your application.
 """
 
+
 @group.command()
 async def instructions(interaction: discord.Interaction):
     await interaction.response.defer()
@@ -23,17 +24,21 @@ async def instructions(interaction: discord.Interaction):
     embed.description = _instructions
     await interaction.followup.send(embed=embed)
 
+
 @group.command()
 async def requirements(interaction: discord.Interaction):
     await interaction.response.defer()
     file_path = os.path.join(ASSETS_DIR, "rank_reqs.png")
     if not os.path.exists(file_path):
         logger.error(f"File not found: {file_path}")
-        await interaction.followup.send("Image not found. Please contact a moderator.", ephemeral=True)
+        await interaction.followup.send(
+            "Image not found. Please contact a moderator.", ephemeral=True
+        )
         return
     with open(file_path, "rb") as f:
         file = discord.File(f)
     await interaction.followup.send(file=file)
+
 
 @group.command()
 async def mentee(interaction: discord.Interaction):
@@ -41,11 +46,14 @@ async def mentee(interaction: discord.Interaction):
     file_path = os.path.join(ASSETS_DIR, "mentee.png")
     if not os.path.exists(file_path):
         logger.error(f"File not found: {file_path}")
-        await interaction.followup.send("Image not found. Please contact a moderator.", ephemeral=True)
+        await interaction.followup.send(
+            "Image not found. Please contact a moderator.", ephemeral=True
+        )
         return
     with open(file_path, "rb") as f:
         file = discord.File(f)
     await interaction.followup.send(file=file)
+
 
 @group.command()
 async def upgrades(interaction: discord.Interaction):
@@ -53,11 +61,14 @@ async def upgrades(interaction: discord.Interaction):
     file_path = os.path.join(ASSETS_DIR, "direct_upgrades.png")
     if not os.path.exists(file_path):
         logger.error(f"File not found: {file_path}")
-        await interaction.followup.send("Image not found. Please contact a moderator.", ephemeral=True)
+        await interaction.followup.send(
+            "Image not found. Please contact a moderator.", ephemeral=True
+        )
         return
     with open(file_path, "rb") as f:
         file = discord.File(f)
     await interaction.followup.send(file=file)
+
 
 async def setup(client: discord.Client, guild):
     client.tree.add_command(group, guild=guild)

@@ -23,29 +23,47 @@ If you are looking for a fun, friendly, and active OSRS community, you are in th
 
 
 class ReasonModal(discord.ui.Modal, title="Add Reason"):
-    reason = discord.ui.TextInput(label="Reason for Closing Ticket", min_length=1, max_length=1000)
+    reason = discord.ui.TextInput(
+        label="Reason for Closing Ticket", min_length=1, max_length=1000
+    )
+
     def __init__(self):
         super().__init__(timeout=None, custom_id="reason_modal")
-        
+
     async def on_submit(self, interaction: discord.Interaction):
         archive = discord.utils.get(interaction.guild.channels, id=ticket_archive.id)
         await interaction.response.send_message("Archiving Ticket...", ephemeral=True)
-        await archive.send(f"**{interaction.channel.name}** Closed by {interaction.user.mention}\n\n**Reason:**\n ```{self.reason.value}```")
+        await archive.send(
+            f"**{interaction.channel.name}** Closed by {interaction.user.mention}\n\n**Reason:**\n ```{self.reason.value}```"
+        )
         await interaction.channel.delete()
+
 
 class InnerTicketView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
 
-    @discord.ui.button(label='Close Ticket', style=discord.ButtonStyle.danger, custom_id="close_ticket")
-    async def close_ticket(self, interaction: discord.Interaction, button: discord.ui.Button):
+    @discord.ui.button(
+        label="Close Ticket", style=discord.ButtonStyle.danger, custom_id="close_ticket"
+    )
+    async def close_ticket(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ):
         archive = discord.utils.get(interaction.guild.channels, id=ticket_archive.id)
-        await interaction.response.send_message('Ticket Closed!', ephemeral=True)
-        await archive.send(f'**{interaction.channel.name}** Closed by {interaction.user.mention} **Reason:** None')
+        await interaction.response.send_message("Ticket Closed!", ephemeral=True)
+        await archive.send(
+            f"**{interaction.channel.name}** Closed by {interaction.user.mention} **Reason:** None"
+        )
         await interaction.channel.delete()
-    
-    @discord.ui.button(label="Close with Reason", style=discord.ButtonStyle.danger, custom_id="close_with_reason")
-    async def close_with_reason(self, interaction: discord.Interaction, button: discord.ui.Button):
+
+    @discord.ui.button(
+        label="Close with Reason",
+        style=discord.ButtonStyle.danger,
+        custom_id="close_with_reason",
+    )
+    async def close_with_reason(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ):
         await interaction.response.send_modal(ReasonModal())
 
 
@@ -53,65 +71,158 @@ class TicketView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
 
-    @discord.ui.button(label='Other', style=discord.ButtonStyle.primary, custom_id="other_ticket")
-    async def other_ticket(self, interaction: discord.Interaction, button: discord.ui.Button):
-        embed = discord.Embed(title="Ticket Created!", description="Your ticket has been created! Please wait for a staff member to assist you!", color=discord.Color.green())
-        await interaction.response.send_message("Creating Ticket...", ephemeral=True, delete_after=5)
+    @discord.ui.button(
+        label="Other", style=discord.ButtonStyle.primary, custom_id="other_ticket"
+    )
+    async def other_ticket(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ):
+        embed = discord.Embed(
+            title="Ticket Created!",
+            description="Your ticket has been created! Please wait for a staff member to assist you!",
+            color=discord.Color.green(),
+        )
+        await interaction.response.send_message(
+            "Creating Ticket...", ephemeral=True, delete_after=5
+        )
         guild = interaction.guild
-        ticket_channel = await guild.create_text_channel(name=f'ticket-{interaction.user}', category=ticket_category, position=1)
-        await ticket_channel.set_permissions(guild.default_role, read_messages=False, send_messages=False)
-        await ticket_channel.set_permissions(interaction.user, read_messages=True, send_messages=True)
-        await ticket_channel.set_permissions(guild.get_role(tickets_role), read_messages=True, send_messages=True)
-        await ticket_channel.send(f"{interaction.user.mention} {guild.get_role(tickets_role).mention}", embed=embed, view=InnerTicketView())
-    
-    
-    @discord.ui.button(label='Rankup', style=discord.ButtonStyle.primary, custom_id="rankup_ticket")
-    async def rankup_ticket(self, interaction: discord.Interaction, button: discord.ui.Button):
-        embed = discord.Embed(title="Ticket Created!", description="Your ticket has been created! Please wait for a staff member to assist you!", color=discord.Color.green())
-        await interaction.response.send_message("Creating Ticket...", ephemeral=True, delete_after=5)
-        guild = interaction.guild
-        ticket_channel = await guild.create_text_channel(name=f'rankup-{interaction.user}', category=ticket_category, position=1)
-        await ticket_channel.set_permissions(guild.default_role, read_messages=False, send_messages=False)
-        await ticket_channel.set_permissions(interaction.user, read_messages=True, send_messages=True)
-        await ticket_channel.set_permissions(guild.get_role(tickets_role), read_messages=True, send_messages=True)
-        await ticket_channel.send(f"{interaction.user.mention} {guild.get_role(tickets_role).mention}", embed=embed, view=InnerTicketView())
-        await ticket_channel.send(rankup_message)
-    
-    
-    @discord.ui.button(label='Join CC', style=discord.ButtonStyle.green, custom_id="join_ticket")
-    async def join_ticket(self, interaction: discord.Interaction, button: discord.ui.Button):
-        embed = discord.Embed(title="Ticket Created!", description="Your ticket has been created! Please wait for a staff member to assist you!", color=discord.Color.green())
-        await interaction.response.send_message("Creating Ticket...", ephemeral=True, delete_after=5)
-        guild = interaction.guild
-        ticket_channel = await guild.create_text_channel(name=f'new_member-{interaction.user}', category=ticket_category, position=1)
-        await ticket_channel.set_permissions(guild.default_role, read_messages=False, send_messages=False)
-        await ticket_channel.set_permissions(interaction.user, read_messages=True, send_messages=True)
-        await ticket_channel.set_permissions(guild.get_role(tickets_role), read_messages=True, send_messages=True)
-        await ticket_channel.send(f"{interaction.user.mention} {guild.get_role(tickets_role).mention}", embed=embed, view=InnerTicketView())
-        await ticket_channel.send(rankup_message)
-    
-    @discord.ui.button(label="Apply for Legend/Moderator", style=discord.ButtonStyle.gray, custom_id="legend-mod", row=1)
-    async def apply_ticket(self, interaction: discord.Interaction, button: discord.ui.Button):
-        embed = discord.Embed(title="Ticket Created!", description="Your ticket has been created! Please wait for a staff member to assist you!", color=discord.Color.green())
-        await interaction.response.send_message("Creating Ticket...", ephemeral=True, delete_after=5)
-        guild = interaction.guild
-        ticket_channel = await guild.create_text_channel(name=f'application-{interaction.user}', category=ticket_category, position=1)
-        await ticket_channel.set_permissions(guild.default_role, read_messages=False, send_messages=False)
-        await ticket_channel.set_permissions(interaction.user, read_messages=True, send_messages=True)
-        await ticket_channel.set_permissions(guild.get_role(senior_role), read_messages=True, send_messages=True)
-        await ticket_channel.send(f"{interaction.user.mention} {guild.get_role(senior_role).mention}", embed=embed, view=InnerTicketView())
+        ticket_channel = await guild.create_text_channel(
+            name=f"ticket-{interaction.user}", category=ticket_category, position=1
+        )
+        await ticket_channel.set_permissions(
+            guild.default_role, read_messages=False, send_messages=False
+        )
+        await ticket_channel.set_permissions(
+            interaction.user, read_messages=True, send_messages=True
+        )
+        await ticket_channel.set_permissions(
+            guild.get_role(tickets_role), read_messages=True, send_messages=True
+        )
+        await ticket_channel.send(
+            f"{interaction.user.mention} {guild.get_role(tickets_role).mention}",
+            embed=embed,
+            view=InnerTicketView(),
+        )
 
-        
+    @discord.ui.button(
+        label="Rankup", style=discord.ButtonStyle.primary, custom_id="rankup_ticket"
+    )
+    async def rankup_ticket(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ):
+        embed = discord.Embed(
+            title="Ticket Created!",
+            description="Your ticket has been created! Please wait for a staff member to assist you!",
+            color=discord.Color.green(),
+        )
+        await interaction.response.send_message(
+            "Creating Ticket...", ephemeral=True, delete_after=5
+        )
+        guild = interaction.guild
+        ticket_channel = await guild.create_text_channel(
+            name=f"rankup-{interaction.user}", category=ticket_category, position=1
+        )
+        await ticket_channel.set_permissions(
+            guild.default_role, read_messages=False, send_messages=False
+        )
+        await ticket_channel.set_permissions(
+            interaction.user, read_messages=True, send_messages=True
+        )
+        await ticket_channel.set_permissions(
+            guild.get_role(tickets_role), read_messages=True, send_messages=True
+        )
+        await ticket_channel.send(
+            f"{interaction.user.mention} {guild.get_role(tickets_role).mention}",
+            embed=embed,
+            view=InnerTicketView(),
+        )
+        await ticket_channel.send(rankup_message)
+
+    @discord.ui.button(
+        label="Join CC", style=discord.ButtonStyle.green, custom_id="join_ticket"
+    )
+    async def join_ticket(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ):
+        embed = discord.Embed(
+            title="Ticket Created!",
+            description="Your ticket has been created! Please wait for a staff member to assist you!",
+            color=discord.Color.green(),
+        )
+        await interaction.response.send_message(
+            "Creating Ticket...", ephemeral=True, delete_after=5
+        )
+        guild = interaction.guild
+        ticket_channel = await guild.create_text_channel(
+            name=f"new_member-{interaction.user}", category=ticket_category, position=1
+        )
+        await ticket_channel.set_permissions(
+            guild.default_role, read_messages=False, send_messages=False
+        )
+        await ticket_channel.set_permissions(
+            interaction.user, read_messages=True, send_messages=True
+        )
+        await ticket_channel.set_permissions(
+            guild.get_role(tickets_role), read_messages=True, send_messages=True
+        )
+        await ticket_channel.send(
+            f"{interaction.user.mention} {guild.get_role(tickets_role).mention}",
+            embed=embed,
+            view=InnerTicketView(),
+        )
+        await ticket_channel.send(rankup_message)
+
+    @discord.ui.button(
+        label="Apply for Legend/Moderator",
+        style=discord.ButtonStyle.gray,
+        custom_id="legend-mod",
+        row=1,
+    )
+    async def apply_ticket(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ):
+        embed = discord.Embed(
+            title="Ticket Created!",
+            description="Your ticket has been created! Please wait for a staff member to assist you!",
+            color=discord.Color.green(),
+        )
+        await interaction.response.send_message(
+            "Creating Ticket...", ephemeral=True, delete_after=5
+        )
+        guild = interaction.guild
+        ticket_channel = await guild.create_text_channel(
+            name=f"application-{interaction.user}", category=ticket_category, position=1
+        )
+        await ticket_channel.set_permissions(
+            guild.default_role, read_messages=False, send_messages=False
+        )
+        await ticket_channel.set_permissions(
+            interaction.user, read_messages=True, send_messages=True
+        )
+        await ticket_channel.set_permissions(
+            guild.get_role(senior_role), read_messages=True, send_messages=True
+        )
+        await ticket_channel.send(
+            f"{interaction.user.mention} {guild.get_role(senior_role).mention}",
+            embed=embed,
+            view=InnerTicketView(),
+        )
+
+
 @app_commands.command()
 async def send_ticket_view(interaction: discord.Interaction):
     if not interaction.user.guild_permissions.administrator:
         await interaction.response.send_message("Missing Permissions")
         return
-    embed = discord.Embed(title="Open a ticket!", description="Click below to open a ticket!", color=discord.Color.blurple())
+    embed = discord.Embed(
+        title="Open a ticket!",
+        description="Click below to open a ticket!",
+        color=discord.Color.blurple(),
+    )
     view = TicketView()
     await interaction.response.send_message(embed=embed, view=view)
-    
-    
+
+
 async def ticket_setup(client: discord.Client, guild: discord.Guild):
     client.tree.add_command(send_ticket_view, guild=guild)
     client.add_view(TicketView())

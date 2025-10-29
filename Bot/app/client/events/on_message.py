@@ -5,25 +5,36 @@ from loguru import logger
 from datetime import datetime
 
 from ..modules.mongo import MongoClient
-from ..modules.ticket_tracker import last_activity, warned, ticket_category, ticket_origin
+from ..modules.ticket_tracker import (
+    last_activity,
+    warned,
+    ticket_category,
+    ticket_origin,
+)
 
 
 client = MongoClient()
 cache = TTLCache(maxsize=128, ttl=60)
-DISCORD_INVITE_REGEX = re.compile(r"(?:https?://)?(?:discord\.gg|discord\.com/invite)/([\w-]+)", re.IGNORECASE)
+DISCORD_INVITE_REGEX = re.compile(
+    r"(?:https?://)?(?:discord\.gg|discord\.com/invite)/([\w-]+)", re.IGNORECASE
+)
+
 
 @cached(cache)
 async def get_whitelisted_links() -> set[str] | None:
     try:
-        links = await client.get_many(collection="System", query={"tag": "whitelisted_url"})
+        links = await client.get_many(
+            collection="System", query={"tag": "whitelisted_url"}
+        )
         if not links:
             return None
-        
-        allowed_links = {doc["url"] for doc in links} 
+
+        allowed_links = {doc["url"] for doc in links}
         return allowed_links
-    
+
     except Exception as e:
         logger.debug(f"Error getting links: {e}")
+
 
 async def check_allowed_links(message: discord.Message) -> set[str] | None:
     offending_links = set()
@@ -44,11 +55,19 @@ async def handle_message(client: discord.Client, message: discord.Message):
         return
     link_check = await check_allowed_links(message)
     if link_check:
-        await message.author.send(embed=discord.Embed(title="Non whitelisted Discord Link.", description=f"Your message contained a link that is not whitelisted. Please remove the following link(s) and try again.: {link_check}", color=discord.Color.red()))
+        await message.author.send(
+            embed=discord.Embed(
+                title="Non whitelisted Discord Link.",
+                description=f"Your message contained a link that is not whitelisted. Please remove the following link(s) and try again.: {link_check}",
+                color=discord.Color.red(),
+            )
+        )
         await message.delete()
         return
-    if message.channel.category_id == ticket_category.id and not message.channel.id == ticket_origin.id:
+    if (
+        message.channel.category_id == ticket_category.id
+        and not message.channel.id == ticket_origin.id
+    ):
         last_activity[message.channel.id] = datetime.now()
         if message.channel.id in warned:
             warned.remove(message.channel.id)
-            

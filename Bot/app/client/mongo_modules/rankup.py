@@ -5,6 +5,7 @@ from ..modules.mongo import MongoClient
 client = MongoClient()
 connected = False
 
+
 async def client_connect() -> None:
     global connected
     if not connected:
@@ -15,8 +16,8 @@ async def client_connect() -> None:
         except Exception as e:
             connected = False
             logger.error(f"Error connecting to MongoDB: {e}")
-            
-            
+
+
 async def get_user(user_id: int) -> None | dict:
     await client_connect()
     try:
@@ -30,7 +31,8 @@ async def get_user(user_id: int) -> None | dict:
         await client.close()
         global connected
         connected = False
-    
+
+
 async def get_ranks() -> None | dict:
     await client_connect()
     try:
@@ -44,7 +46,8 @@ async def get_ranks() -> None | dict:
         await client.close()
         global connected
         connected = False
-    
+
+
 async def update_user(user_id: int, update: dict) -> None:
     await client_connect()
     try:
@@ -56,7 +59,8 @@ async def update_user(user_id: int, update: dict) -> None:
         await client.close()
         global connected
         connected = False
-        
+
+
 async def start_rankup(user_id: int):
     await client_connect()
     rank_dict = {}
@@ -74,12 +78,12 @@ async def start_rankup(user_id: int):
         rank_dict.update(ranks)
     except Exception as e:
         logger.error(f"Error fetching ranks: {e}")
-    
+
     rankup_doc = {
         "_id": user_id,
         "accounts": accounts,
         "ranks": rank_dict,
-        "selected_rank": None
+        "selected_rank": None,
     }
     try:
         await client.insert_document("Active Rankups", rankup_doc)
@@ -89,7 +93,8 @@ async def start_rankup(user_id: int):
         await client.close()
         global connected
         connected = False
-        
+
+
 async def get_active_rankup(user_id: int) -> None | dict:
     await client_connect()
     try:
@@ -103,16 +108,20 @@ async def get_active_rankup(user_id: int) -> None | dict:
         global connected
         connected = False
 
+
 async def update_active_rankup(user_id: int, rank: str):
     await client_connect()
     try:
-        await client.update_document("Active Rankups", {"_id": user_id}, {"$set": {"selected_rank": rank}})
+        await client.update_document(
+            "Active Rankups", {"_id": user_id}, {"$set": {"selected_rank": rank}}
+        )
     except Exception as e:
         logger.error(f"Error updating active rankup: {e}")
     finally:
         await client.close()
         global connected
         connected = False
+
 
 async def close_active_rankup(user_id: int):
     await client_connect()
@@ -128,4 +137,3 @@ async def close_active_rankup(user_id: int):
         await client.close()
         global connected
         connected = False
-        

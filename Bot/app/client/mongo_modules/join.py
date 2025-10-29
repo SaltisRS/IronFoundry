@@ -5,6 +5,7 @@ from ..modules.mongo import MongoClient
 
 client = MongoClient()
 
+
 async def get_roles() -> None | list:
     try:
         roles = await client.get_many(collection="Join-roles", query={})
@@ -15,7 +16,7 @@ async def get_roles() -> None | list:
     except Exception as e:
         logger.error(f"Error getting roles: {e}")
 
-        
+
 async def add_role(role: discord.Role) -> None | bool:
     new_role = {"_id": role.id, "name": role.name}
     logger.info(role.name)

@@ -1,5 +1,6 @@
 from typing import TypedDict
 
+
 class UserModel(TypedDict):
     _id: int
     rsn: str = None

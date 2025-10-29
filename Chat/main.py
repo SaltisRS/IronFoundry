@@ -1,4 +1,4 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Header, HTTPException, Request
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Header, HTTPException
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel
 from cachetools import TTLCache
@@ -13,6 +13,7 @@ connected_clients: List[WebSocket] = []
 
 message_cache = TTLCache(maxsize=512, ttl=60)
 
+
 class ChatEntry(BaseModel):
     clan_name: str
     sender: str
@@ -20,11 +21,12 @@ class ChatEntry(BaseModel):
     rank: Optional[str] = None
     icon_id: Optional[int] = None
     is_league_world: Optional[bool] = False
-    
+
 
 class WebSocketMessage(BaseModel):
     message_type: str
     message: Dict[str, Any]
+
 
 @app.websocket("/recieve")
 async def websocket_endpoint(websocket: WebSocket):
@@ -34,10 +36,7 @@ async def websocket_endpoint(websocket: WebSocket):
     # Send connected message on connect
     connected_message = {
         "message_type": "ToClanChat",
-        "message": {
-            "sender": "System",
-            "message": "Connected to IF Chat"
-        }
+        "message": {"sender": "System", "message": "Connected to IF Chat"},
     }
 
     await websocket.send_json(connected_message)
@@ -52,7 +51,7 @@ async def websocket_endpoint(websocket: WebSocket):
 @app.post("/send")
 async def send_clan_chats(
     entries: List[ChatEntry],
-    verification_code: str = Header(..., alias="verification-code")
+    verification_code: str = Header(..., alias="verification-code"),
 ):
     if verification_code != VERIFICATION_CODE:
         raise HTTPException(status_code=403, detail="Invalid verification code")
@@ -70,6 +69,7 @@ async def send_clan_chats(
 
     return {"received": len(entries), "forwarded": len(new_entries)}
 
+
 @app.get("/send")
 async def respond_heartbeat():
     return {"status": "OK"}
@@ -78,7 +78,7 @@ async def respond_heartbeat():
 @app.post("/publish")
 async def discord_to_runelite(
     payload: WebSocketMessage,
-    verification_code: str = Header(..., alias="verification-code")
+    verification_code: str = Header(..., alias="verification-code"),
 ):
     if verification_code != VERIFICATION_CODE:
         raise HTTPException(status_code=403, detail="Invalid verification code")
@@ -97,6 +97,7 @@ async def discord_to_runelite(
 
 
 # --- Stub: forward message to Discord bot ---
+
 
 async def forward_to_discord_bot(entry: ChatEntry):
     # TODO: Implement actual forwarding here.

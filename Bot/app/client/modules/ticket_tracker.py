@@ -1,4 +1,3 @@
-from datetime import datetime
 import discord
 
 ticket_origin = discord.Object(id=1007429119845335110)
