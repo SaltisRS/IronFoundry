@@ -5,7 +5,7 @@ locked_categories = {}
 
 
 @app_commands.command()
-@app_commands.default_permissions(adminsitrator=True)
+@app_commands.default_permissions(administrator=True)
 async def lock_category(
     interaction: discord.Interaction, category: discord.CategoryChannel
 ):
