@@ -91,7 +91,7 @@ class DiscordClient(discord.Client):
         await system_setup(self, self.selected_guild)
         await tempvc_setup(self, self.selected_guild)
         await tag_setup(self, self.selected_guild)
-        await self.tree.add_command(lock_category, self.selected_guild)
+        self.tree.add_command(lock_category, guild=self.selected_guild)
         result = await self.tree.sync(guild=self.selected_guild)
         logger.info(f"Commands loaded: {result}")
 
