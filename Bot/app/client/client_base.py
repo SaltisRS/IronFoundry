@@ -20,6 +20,7 @@ from client.commands.lock_category import lock_category, locked_categories
 
 channels_to_track = [1386299832196399217, 1088090554216235019, 1386299925641433198]
 staff_roles = [965399119021617162, 965402001066299424]
+restoring_categories = set()
 
 join_msg = """### Welcome to Iron Foundry!
 Head on over to #💬-speak-to-staff and click "Join CC" to create a ticket to be ranked and invited into the cc!"""
@@ -103,25 +104,36 @@ class DiscordClient(discord.Client):
     async def on_message(self, message: discord.Message):
         await handle_message(self, message)
 
-    async def on_guild_channel_update(
-        self, before: discord.abc.GuildChannel, after: discord.abc.GuildChannel
-    ):
+    async def on_guild_channel_update(self, before, after):
         """Restore channel position if it was moved in a locked category"""
         if after.category_id not in locked_categories:
+            return
+
+        # Don't react to our own changes
+        if after.category_id in restoring_categories:
             return
 
         stored_order = locked_categories[after.category_id]
 
         # Check if position changed
-        if before.position != after.position:
-            # Restore all channels in the category to their stored positions
-            category = after.category
-            for channel in category.channels:
-                if channel.id in stored_order:
-                    expected_pos = stored_order[channel.id]
-                    if channel.position != expected_pos:
-                        await channel.edit(position=expected_pos)
-                        await asyncio.sleep(5)
+        if before.position != after.position and after.id in stored_order:
+            restoring_categories.add(after.category_id)
+
+            try:
+                # Wait briefly to batch multiple rapid changes
+                await asyncio.sleep(0.5)
+
+                # Restore all channels to stored positions
+                category = after.category
+                for channel in category.channels:
+                    if channel.id in stored_order:
+                        expected_pos = stored_order[channel.id]
+                        if channel.position != expected_pos:
+                            await channel.edit(position=expected_pos)
+            finally:
+                # Remove lock after a delay
+                await asyncio.sleep(1)
+                restoring_categories.discard(after.category_id)
 
     async def on_member_join(self, member: discord.Member):
         general = self.get_channel(945052365873090652)
