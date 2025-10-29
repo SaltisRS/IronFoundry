@@ -121,6 +121,7 @@ class DiscordClient(discord.Client):
                     expected_pos = stored_order[channel.id]
                     if channel.position != expected_pos:
                         await channel.edit(position=expected_pos)
+                        await asyncio.sleep(5)
 
     async def on_member_join(self, member: discord.Member):
         general = self.get_channel(945052365873090652)
