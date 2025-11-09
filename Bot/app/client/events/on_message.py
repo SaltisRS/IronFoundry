@@ -7,6 +7,7 @@ from datetime import datetime
 from ..modules.mongo import MongoClient
 from ..modules.ticket_tracker import (
     last_activity,
+    ticket_archive,
     warned,
     ticket_category,
     ticket_origin,
@@ -66,7 +67,7 @@ async def handle_message(client: discord.Client, message: discord.Message):
         return
     if (
         message.channel.category_id == ticket_category.id
-        and not message.channel.id == ticket_origin.id
+        and not message.channel.id == ticket_origin.id or message.channel.id == ticket_archive.id
     ):
         last_activity[message.channel.id] = datetime.now()
         if message.channel.id in warned:
