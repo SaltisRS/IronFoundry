@@ -94,7 +94,7 @@ class PromptModal(discord.ui.Modal, title="VC Settings"):
                 user_limit=user_limit if user_limit > 0 else None,
                 position=1,
             )
-            if self.hidden.value == None:
+            if self.hidden.value is None:
                 self.hidden.value = str(0)
 
             add_active_channel(channel, interaction.user.id)

@@ -40,7 +40,7 @@ async def get_whitelisted_links() -> set[str] | None:
 async def check_allowed_links(message: discord.Message) -> set[str] | None:
     offending_links = set()
     allowed_links = await get_whitelisted_links()
-    if allowed_links == None:
+    if not allowed_links:
         return
     message_links = set(re.findall(DISCORD_INVITE_REGEX, message.content))
     for link in message_links:
@@ -65,7 +65,7 @@ async def handle_message(client: discord.Client, message: discord.Message):
         )
         await message.delete()
         return
-    if message.channel.category_id == ticket_category.id:
+    if message.channel.category_id == ticket_category.id:  # type: ignore
         if message.channel.id in [ticket_archive.id, ticket_origin.id]:
             return
         last_activity[message.channel.id] = datetime.now()
