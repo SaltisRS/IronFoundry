@@ -65,10 +65,9 @@ async def handle_message(client: discord.Client, message: discord.Message):
         )
         await message.delete()
         return
-    if (
-        message.channel.category_id == ticket_category.id
-        and not message.channel.id == ticket_origin.id or message.channel.id == ticket_archive.id
-    ):
+    if message.channel.category_id == ticket_category.id:
+        if message.channel.id in [ticket_archive.id, ticket_origin.id]:
+            return
         last_activity[message.channel.id] = datetime.now()
         if message.channel.id in warned:
             warned.remove(message.channel.id)
