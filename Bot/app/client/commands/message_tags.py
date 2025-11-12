@@ -28,46 +28,19 @@ async def instructions(interaction: discord.Interaction):
 @group.command()
 async def requirements(interaction: discord.Interaction):
     await interaction.response.defer()
-    file_path = os.path.join(ASSETS_DIR, "rank_reqs.png")
-    if not os.path.exists(file_path):
-        logger.error(f"File not found: {file_path}")
-        await interaction.followup.send(
-            "Image not found. Please contact a moderator.", ephemeral=True
-        )
-        return
-    with open(file_path, "rb") as f:
-        file = discord.File(f)
-    await interaction.followup.send(file=file)
+    await interaction.followup.send("https://copyparty.ironfoundry.cc/public/rank-requirements/latest/rank-reqs.png")
 
 
 @group.command()
 async def mentee(interaction: discord.Interaction):
     await interaction.response.defer()
-    file_path = os.path.join(ASSETS_DIR, "mentee.png")
-    if not os.path.exists(file_path):
-        logger.error(f"File not found: {file_path}")
-        await interaction.followup.send(
-            "Image not found. Please contact a moderator.", ephemeral=True
-        )
-        return
-    with open(file_path, "rb") as f:
-        file = discord.File(f)
-    await interaction.followup.send(file=file)
+    await interaction.followup.send("https://copyparty.ironfoundry.cc/public/rank-requirements/latest/mentee.png")
 
 
 @group.command()
 async def upgrades(interaction: discord.Interaction):
     await interaction.response.defer()
-    file_path = os.path.join(ASSETS_DIR, "direct_upgrades.png")
-    if not os.path.exists(file_path):
-        logger.error(f"File not found: {file_path}")
-        await interaction.followup.send(
-            "Image not found. Please contact a moderator.", ephemeral=True
-        )
-        return
-    with open(file_path, "rb") as f:
-        file = discord.File(f)
-    await interaction.followup.send(file=file)
+    await interaction.followup.send("https://copyparty.ironfoundry.cc/public/rank-requirements/latest/directupgrades.png")
 
 
 async def setup(client: discord.Client, guild):
