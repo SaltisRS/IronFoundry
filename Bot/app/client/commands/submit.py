@@ -486,7 +486,7 @@ async def list_teams(interaction: discord.Interaction):
 
     await interaction.response.send_message(embed=embed)
 
-class SubmissionView(View):
+class SubmissionView(discord.ui.View):
     def __init__(self, team_name: str, task_id: str, submitter: discord.Member):
         super().__init__(timeout=None)
         self.team_name = team_name
