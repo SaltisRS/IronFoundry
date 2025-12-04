@@ -2,10 +2,27 @@ import discord
 from discord import app_commands
 import json
 
+from discord.app_commands.models import app_command_option_factory
+
 
 DATA_FILE = "foundry_trials.json"
 event_data = None
 
+
+async def team_name_autocomplete(
+    interaction: discord.Interaction,
+    current: str,
+) -> list[app_commands.Choice[str]]:
+    if event_data is None or not event_data.get("teams"):
+        return []
+    
+    teams = event_data["teams"]
+    return [
+        app_commands.Choice(name=team["teamName"], value=team["teamName"])
+        for team in teams
+        if current.lower() in team["teamName"].lower()
+    ][:25]
+    
 def load_data():
     global event_data
     try:
@@ -269,6 +286,7 @@ async def create_team(interaction: discord.Interaction, team_name: str):
     )
 
 @app_commands.command(name="add_member", description="Add a member to a team")
+@app_commands.autocomplete(team_name=team_name_autocomplete)
 async def add_member(interaction: discord.Interaction, team_name: str, member: discord.Member):
     if not (interaction.user.guild_permissions.administrator or is_host(interaction.user.id)):
         await interaction.response.send_message(
@@ -352,6 +370,7 @@ async def remove_member(interaction: discord.Interaction, member: discord.Member
     )
 
 @app_commands.command(name="view_team", description="View team information")
+@app_commands.autocomplete(team_name=team_name_autocomplete)
 async def view_team(interaction: discord.Interaction, team_name: str):
     if event_data is None:
         await interaction.response.send_message(
@@ -667,6 +686,93 @@ async def submit(
 
     await interaction.response.send_message(embed=embed, view=view)
     
+@app_commands.command(name="delete_team", description="Delete a team")
+@app_commands.describe(team_name="The team to delete")
+@app_commands.autocomplete(team_name=team_name_autocomplete)
+async def delete_team(interaction: discord.Interaction, team_name: str):
+    if not (interaction.user.guild_permissions.administrator or is_host(interaction.user.id)):
+        await interaction.response.send_message(
+            "❌ You need host permissions to use this command!",
+            ephemeral=True
+        )
+        return
+
+    if event_data is None:
+        await interaction.response.send_message(
+            "❌ Event not initialized!",
+            ephemeral=True
+        )
+        return
+
+    # Find and remove the team
+    for i, team in enumerate(event_data["teams"]):
+        if team["teamName"].lower() == team_name.lower():
+            event_data["teams"].pop(i)
+            save_data()
+            await interaction.response.send_message(
+                f"✅ Team '{team_name}' has been deleted!",
+                ephemeral=True
+            )
+            return
+
+    await interaction.response.send_message(
+        f"❌ Team '{team_name}' not found!",
+        ephemeral=True
+    )
+
+@app_commands.command(name="rename_team", description="Rename a team")
+@app_commands.describe(
+    old_name="Current team name",
+    new_name="New team name"
+)
+@app_commands.autocomplete(old_name=team_name_autocomplete)
+async def rename_team(interaction: discord.Interaction, old_name: str, new_name: str):
+    if not (interaction.user.guild_permissions.administrator or is_host(interaction.user.id)):
+        await interaction.response.send_message(
+            "❌ You need host permissions to use this command!",
+            ephemeral=True
+        )
+        return
+
+    if event_data is None:
+        await interaction.response.send_message(
+            "❌ Event not initialized!",
+            ephemeral=True
+        )
+        return
+
+    # Find the team with old name
+    team = None
+    for t in event_data["teams"]:
+        if t["teamName"].lower() == old_name.lower():
+            team = t
+            break
+
+    if team is None:
+        await interaction.response.send_message(
+            f"❌ Team '{old_name}' not found!",
+            ephemeral=True
+        )
+        return
+
+    # Check if new name already exists
+    for t in event_data["teams"]:
+        if t["teamName"].lower() == new_name.lower():
+            await interaction.response.send_message(
+                f"❌ Team '{new_name}' already exists!",
+                ephemeral=True
+            )
+            return
+
+    # Update the name
+    team["teamName"] = new_name
+    save_data()
+
+    await interaction.response.send_message(
+        f"✅ Team '{old_name}' has been renamed to '{new_name}'!",
+        ephemeral=True
+    )
+    
     
 async def setup(client: discord.Client, guild: discord.Guild):
     client.tree.add_command(submit, guild=guild)
@@ -679,3 +785,5 @@ async def setup(client: discord.Client, guild: discord.Guild):
     client.tree.add_command(view_team, guild=guild)
     client.tree.add_command(list_teams, guild=guild)
     client.tree.add_command(leaderboard, guild=guild)
+    client.tree.add_command(rename_team, guild=guild)
+    client.tree.add_command(delete_team, guild=guild)
