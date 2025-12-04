@@ -28,19 +28,25 @@ async def instructions(interaction: discord.Interaction):
 @group.command()
 async def requirements(interaction: discord.Interaction):
     await interaction.response.defer()
-    await interaction.followup.send("https://copyparty.ironfoundry.cc/public/rank-requirements/latest/rank-reqs.png")
+    await interaction.followup.send(
+        "https://copyparty.ironfoundry.cc/public/rank-requirements/latest/rank-reqs.png"
+    )
 
 
 @group.command()
 async def mentee(interaction: discord.Interaction):
     await interaction.response.defer()
-    await interaction.followup.send("https://copyparty.ironfoundry.cc/public/rank-requirements/latest/mentee.png")
+    await interaction.followup.send(
+        "https://copyparty.ironfoundry.cc/public/rank-requirements/latest/mentee.png"
+    )
 
 
 @group.command()
 async def upgrades(interaction: discord.Interaction):
     await interaction.response.defer()
-    await interaction.followup.send("https://copyparty.ironfoundry.cc/public/rank-requirements/latest/directupgrades.png")
+    await interaction.followup.send(
+        "https://copyparty.ironfoundry.cc/public/rank-requirements/latest/directupgrades.png"
+    )
 
 
 async def setup(client: discord.Client, guild):
