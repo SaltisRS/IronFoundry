@@ -666,3 +666,16 @@ async def submit(
     view = SubmissionView(team["teamName"], task, interaction.user)
 
     await interaction.response.send_message(embed=embed, view=view)
+    
+    
+async def setup(client: discord.Client, guild: discord.Guild):
+    client.tree.add_command(submit, guild=guild)
+    client.tree.add_command(add_host, guild=guild)
+    client.tree.add_command(remove_host, guild=guild)
+    client.tree.add_command(initialize_event, guild=guild)
+    client.tree.add_command(add_member, guild=guild)
+    client.tree.add_command(remove_member, guild=guild)
+    client.tree.add_command(create_team, guild=guild)
+    client.tree.add_command(view_team, guild=guild)
+    client.tree.add_command(list_teams, guild=guild)
+    client.tree.add_command(leaderboard, guild=guild)
