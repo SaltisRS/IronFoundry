@@ -494,7 +494,7 @@ class SubmissionView(discord.ui.View):
         self.submitter = submitter
 
     @discord.ui.button(label="Accept", style=discord.ButtonStyle.green, custom_id="accept_submission")
-    async def accept_button(self, interaction: discord.Interaction, button: Button):
+    async def accept_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         if not (interaction.user.guild_permissions.administrator or is_host(interaction.user.id)):
             await interaction.response.send_message(
                 "❌ Only hosts can accept submissions!",
@@ -556,7 +556,7 @@ class SubmissionView(discord.ui.View):
             )
 
     @discord.ui.button(label="Deny", style=discord.ButtonStyle.red, custom_id="deny_submission")
-    async def deny_button(self, interaction: discord.Interaction, button: Button):
+    async def deny_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         if not (interaction.user.guild_permissions.administrator or is_host(interaction.user.id)):
             await interaction.response.send_message(
                 "❌ Only hosts can deny submissions!",
