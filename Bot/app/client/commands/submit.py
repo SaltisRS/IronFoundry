@@ -774,6 +774,7 @@ async def rename_team(interaction: discord.Interaction, old_name: str, new_name:
     
     
 async def setup(client: discord.Client, guild: discord.Guild):
+    load_data()
     client.tree.add_command(submit, guild=guild)
     client.tree.add_command(add_host, guild=guild)
     client.tree.add_command(remove_host, guild=guild)
