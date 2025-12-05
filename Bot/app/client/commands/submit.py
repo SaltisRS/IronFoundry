@@ -2,10 +2,9 @@ import discord
 from discord import app_commands
 import json
 
-from discord.app_commands.models import app_command_option_factory
 
 
-DATA_FILE = "foundry_trials.json"
+DATA_FILE = "app/client/commands/foundry_trials.json"
 event_data = None
 
 
