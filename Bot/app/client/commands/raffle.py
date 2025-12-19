@@ -86,11 +86,13 @@ class RaffleView(View):
                 description="Current raffle stats and prize breakdown",
                 color=discord.Color.gold(),
             )
-
+            embed.set_image(url="https://media.discordapp.net/attachments/965397194482012200/1451652879646588968/RAFFLE_FLYER_2.png?ex=6946f498&is=6945a318&hm=2b32f2f9216fe5c3926138460a320bfc1bc32564988147162cf099fd5824ade9&=&format=webp&quality=lossless&width=1324&height=2353")
+            # ---- Totals ----
             embed.add_field(name="💰 Total Pot", value=f"{total_pot:,} GP", inline=True)
             embed.add_field(name="🎫 Total Tickets", value=f"{total_tickets:,}", inline=True)
             embed.add_field(name="💎 Total Donations", value=f"{total_donations:,} GP", inline=True)
 
+            # ---- Prizes ----
             embed.add_field(
                 name="🏆 Raffle Distribution",
                 value=(
@@ -101,6 +103,11 @@ class RaffleView(View):
                 inline=False,
             )
 
+            field_count = 4  # already added fields
+
+            # =====================
+            # Ticket Holders
+            # =====================
             if tickets_data:
                 sorted_tickets = sorted(
                     tickets_data.items(),
@@ -125,16 +132,63 @@ class RaffleView(View):
                 if current:
                     chunks.append("\n".join(current))
 
-                for i, chunk in enumerate(chunks[:25], 1):
+                for i, chunk in enumerate(chunks):
+                    if field_count >= 25:
+                        break
                     embed.add_field(
-                        name=f"🎫 Ticket Holders (Part {i})",
+                        name="🎫 Ticket Holders" if i == 0 else f"🎫 Ticket Holders (Part {i+1})",
                         value=chunk,
                         inline=False,
                     )
+                    field_count += 1
             else:
                 embed.add_field(
                     name="🎫 Ticket Holders",
                     value="No tickets purchased yet",
+                    inline=False,
+                )
+                field_count += 1
+
+            # =====================
+            # Donators
+            # =====================
+            if donations_data and field_count < 25:
+                sorted_donations = sorted(
+                    donations_data.items(),
+                    key=lambda item: item[1].get("amount", 0),
+                    reverse=True,
+                )
+
+                lines = []
+                for uid, info in sorted_donations:
+                    member = guild.get_member(int(uid))
+                    name = member.mention if member else f"Unknown User (ID: {uid})"
+                    lines.append(f"{name}: {info.get('amount', 0):,} GP")
+
+                chunks, current = [], []
+                for line in lines:
+                    if sum(len(x) + 1 for x in current) + len(line) > 1024:
+                        chunks.append("\n".join(current))
+                        current = [line]
+                    else:
+                        current.append(line)
+
+                if current:
+                    chunks.append("\n".join(current))
+
+                for i, chunk in enumerate(chunks):
+                    if field_count >= 25:
+                        break
+                    embed.add_field(
+                        name="💎 Donators" if i == 0 else f"💎 Donators (Part {i+1})",
+                        value=chunk,
+                        inline=False,
+                    )
+                    field_count += 1
+            elif field_count < 25:
+                embed.add_field(
+                    name="💎 Donators",
+                    value="No donations yet",
                     inline=False,
                 )
 
@@ -148,6 +202,7 @@ class RaffleView(View):
             pass
         except Exception:
             logger.exception("Unexpected error updating raffle view")
+
 
 
 # =========================
