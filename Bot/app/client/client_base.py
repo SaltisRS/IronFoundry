@@ -16,7 +16,6 @@ from client.modules.tempvc import setup as tempvc_setup
 from client.commands.message_tags import setup as tag_setup
 from client.modules.ticket_tracker import last_activity, warned, ticket_archive
 from client.commands.lock_category import lock_category, locked_categories
-from client.commands.submit import setup as event_setup
 from client.commands.raffle import setup as raffle_setup
 
 channels_to_track = [1386299832196399217, 1088090554216235019, 1386299925641433198]

@@ -7,6 +7,7 @@ from discord import app_commands
 from discord.ui import View
 from .groups.raffle import Raffle
 from loguru import logger
+from datetime import datetime, timezone
 
 
 DATA_FILE = "app/client/commands/raffle.json"
@@ -47,6 +48,26 @@ async def _read_json():
 async def _write_json(data: dict):
     await asyncio.to_thread(_sync_write_json, data)
 
+def discord_timestamp(iso_string: str | None, style: str = "R") -> str:
+    """
+    Convert an ISO timestamp to a Discord-formatted timestamp.
+    
+    Parameters:
+    - iso_string: ISO 8601 timestamp string (e.g., from data['last_updated'])
+    - style: Discord timestamp style (R = relative, f = short datetime, F = long, etc.)
+
+    Returns:
+    - A string like "<t:unix_ts:style>" or "Never" if input is None/invalid
+    """
+    if not iso_string:
+        return "Never"
+
+    try:
+        dt = datetime.fromisoformat(iso_string).replace(tzinfo=timezone.utc)
+        ts = int(dt.timestamp())
+        return f"<t:{ts}:{style}>"
+    except Exception:
+        return "Never"
 
 # =========================
 # Raffle View
@@ -193,8 +214,9 @@ class RaffleView(View):
                 )
 
             embed.set_footer(
-                text=f"Last updated: {data.get('last_updated') or 'Never'} | 1 ticket = 1M GP"
+                text=f"Last updated: {discord_timestamp(data.get('last_updated'))} | 1 ticket = 1M GP"
             )
+
 
             await self.message.edit(embed=embed)
 
@@ -251,7 +273,7 @@ async def _restore_persistent_view(client: discord.Client):
         return
 
     try:
-        message = await channel.fetch_message(info["message_id"])
+        message = await channel.get_message(info["message_id"])
     except discord.NotFound:
         return
 
