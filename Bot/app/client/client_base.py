@@ -17,7 +17,7 @@ from client.commands.message_tags import setup as tag_setup
 from client.modules.ticket_tracker import last_activity, warned, ticket_archive
 from client.commands.lock_category import lock_category, locked_categories
 from client.commands.submit import setup as event_setup
-
+from client.commands.raffle import setup as raffle_setup
 
 channels_to_track = [1386299832196399217, 1088090554216235019, 1386299925641433198]
 staff_roles = [965399119021617162, 965402001066299424]
@@ -92,7 +92,7 @@ class DiscordClient(discord.Client):
         await ticket_setup(self, self.selected_guild)
         await system_setup(self, self.selected_guild)
         await tempvc_setup(self, self.selected_guild)
-        await event_setup(self, self.selected_guild)
+        await raffle_setup(self, self.selected_guild)
         await tag_setup(self, self.selected_guild)
         self.tree.add_command(lock_category, guild=self.selected_guild)
         result = await self.tree.sync(guild=self.selected_guild)
