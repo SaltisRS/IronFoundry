@@ -5,6 +5,7 @@ import discord
 from discord import app_commands
 from discord.ui import View
 from .groups.raffle import Raffle
+from loguru import logger
 
 
 DATA_FILE = "app/client/commands/raffle.json"
@@ -33,131 +34,161 @@ class RaffleView(View):
     def __init__(self):
         super().__init__(timeout=None)
         self.message = None
+        logger.info("RaffleView initialized")
 
     async def update_view(self):
-        data = await _read_json()
+        try:
+            logger.info("Starting view update")
+            
+            if not self.message:
+                logger.error("Cannot update view: message is None")
+                return
 
-        total_tickets_count = sum(
-            user_data.get("tickets", 0) for user_data in data["tickets"].values()
-        )
-        total_donations_gp = sum(
-            user_data.get("amount", 0) for user_data in data["donations"].values()
-        )
+            logger.debug(f"Message ID: {self.message.id}, Channel: {self.message.channel.id}")
 
-        # Calculate GP value from tickets
-        tickets_gp_value = total_tickets_count * TICKET_VALUE_GP
-        total_pot_gp = total_donations_gp + tickets_gp_value
+            data = await _read_json()
+            logger.debug(f"Data loaded: tickets={len(data['tickets'])}, donations={len(data['donations'])}")
 
-        # Calculate splits
-        clan_coffer = total_pot_gp * 0.5
-        raffle_pool = total_pot_gp * 0.5
-        first_place = raffle_pool * 0.75
-        second_place = raffle_pool * 0.25
-
-        embed = discord.Embed(
-            title="🎟️ Raffle Information",
-            description="Current raffle stats and prize breakdown",
-            color=discord.Color.gold(),
-        )
-
-        # Pot Information
-        embed.add_field(
-            name="💰 Total Pot",
-            value=f"{total_pot_gp:,} GP",
-            inline=True,
-        )
-        embed.add_field(
-            name="🎫 Total Tickets",
-            value=f"{total_tickets_count:,}",
-            inline=True,
-        )
-        embed.add_field(
-            name="💎 Total Donations",
-            value=f"{total_donations_gp:,} GP",
-            inline=True,
-        )
-
-        # Prize Distribution
-        embed.add_field(
-            name="🏆 Raffle Distribution",
-            value=(
-                f"**Clan Coffer (50%):** {clan_coffer:,.0f} GP\n"
-                f"**1st Place (37.5%):** {first_place:,.0f} GP\n"
-                f"**2nd Place (12.5%):** {second_place:,.0f} GP"
-            ),
-            inline=False,
-        )
-
-        # Ticket holders list
-        if data["tickets"]:
-            sorted_tickets = sorted(
-                data["tickets"].items(),
-                key=lambda item: item[1]["tickets"],
-                reverse=True,
+            total_tickets_count = sum(
+                user_data.get("tickets", 0) for user_data in data["tickets"].values()
+            )
+            total_donations_gp = sum(
+                user_data.get("amount", 0) for user_data in data["donations"].values()
             )
 
-            ticket_list = []
-            for user_id, user_data in sorted_tickets:
-                user = (
-                    self.message.guild.get_member(int(user_id))
-                    if self.message
-                    else None
-                )
-                if user:
-                    ticket_list.append(
-                        f"{user.mention}: {user_data['tickets']} ticket(s)"
-                    )
-                else:
-                    ticket_list.append(
-                        f"Unknown User (ID: {user_id}): {user_data['tickets']} ticket(s)"
-                    )
+            logger.debug(f"Total tickets: {total_tickets_count}, Total donations: {total_donations_gp}")
 
-            # Split into multiple fields if too long
-            ticket_text = "\n".join(ticket_list)
-            if len(ticket_text) > 1024:
-                # Split into chunks
-                chunks = []
-                current_chunk = []
-                current_length = 0
+            # Calculate GP value from tickets
+            tickets_gp_value = total_tickets_count * TICKET_VALUE_GP
+            total_pot_gp = total_donations_gp + tickets_gp_value
 
-                for line in ticket_list:
-                    line_length = len(line) + 1  # +1 for newline
-                    if current_length + line_length > 1024:
-                        chunks.append("\n".join(current_chunk))
-                        current_chunk = [line]
-                        current_length = line_length
-                    else:
-                        current_chunk.append(line)
-                        current_length += line_length
+            # Calculate splits
+            clan_coffer = total_pot_gp * 0.5
+            raffle_pool = total_pot_gp * 0.5
+            first_place = raffle_pool * 0.75
+            second_place = raffle_pool * 0.25
 
-                if current_chunk:
-                    chunks.append("\n".join(current_chunk))
+            logger.debug(f"Pot calculations: total={total_pot_gp}, clan={clan_coffer}, 1st={first_place}, 2nd={second_place}")
 
-                for i, chunk in enumerate(chunks, 1):
-                    embed.add_field(
-                        name=f"🎫 Ticket Holders (Part {i})",
-                        value=chunk,
-                        inline=False,
-                    )
-            else:
-                embed.add_field(
-                    name="🎫 Ticket Holders",
-                    value=ticket_text,
-                    inline=False,
-                )
-        else:
+            embed = discord.Embed(
+                title="🎟️ Raffle Information",
+                description="Current raffle stats and prize breakdown",
+                color=discord.Color.gold(),
+            )
+
+            # Pot Information
             embed.add_field(
-                name="🎫 Ticket Holders",
-                value="No tickets purchased yet",
+                name="💰 Total Pot",
+                value=f"{total_pot_gp:,} GP",
+                inline=True,
+            )
+            embed.add_field(
+                name="🎫 Total Tickets",
+                value=f"{total_tickets_count:,}",
+                inline=True,
+            )
+            embed.add_field(
+                name="💎 Total Donations",
+                value=f"{total_donations_gp:,} GP",
+                inline=True,
+            )
+
+            # Prize Distribution
+            embed.add_field(
+                name="🏆 Prize Distribution",
+                value=(
+                    f"**Clan Coffer (50%):** {clan_coffer:,.0f} GP\n"
+                    f"**1st Place (37.5%):** {first_place:,.0f} GP\n"
+                    f"**2nd Place (12.5%):** {second_place:,.0f} GP"
+                ),
                 inline=False,
             )
 
-        embed.set_footer(
-            text=f"Last updated: {data['last_updated'] or 'Never'} | 1 ticket = 1M GP"
-        )
+            # Ticket holders list
+            if data["tickets"]:
+                logger.debug(f"Processing {len(data['tickets'])} ticket holders")
+                sorted_tickets = sorted(
+                    data["tickets"].items(),
+                    key=lambda item: item[1]["tickets"],
+                    reverse=True,
+                )
 
-        if self.message:
-            await self.message.edit(embed=embed, silent=True)
+                ticket_list = []
+                for user_id, user_data in sorted_tickets:
+                    try:
+                        user = self.message.guild.get_member(int(user_id))
+                        if user:
+                            ticket_list.append(
+                                f"{user.mention}: {user_data['tickets']} ticket(s)"
+                            )
+                        else:
+                            logger.warning(f"User {user_id} not found in guild")
+                            ticket_list.append(
+                                f"Unknown User (ID: {user_id}): {user_data['tickets']} ticket(s)"
+                            )
+                    except Exception as e:
+                        logger.error(f"Error processing user {user_id}: {e}", exc_info=True)
+                        ticket_list.append(
+                            f"Error processing user {user_id}: {user_data['tickets']} ticket(s)"
+                        )
+
+                # Split into multiple fields if too long
+                ticket_text = "\n".join(ticket_list)
+                logger.debug(f"Ticket text length: {len(ticket_text)}")
+                
+                if len(ticket_text) > 1024:
+                    logger.info("Ticket text too long, splitting into chunks")
+                    # Split into chunks
+                    chunks = []
+                    current_chunk = []
+                    current_length = 0
+
+                    for line in ticket_list:
+                        line_length = len(line) + 1  # +1 for newline
+                        if current_length + line_length > 1024:
+                            chunks.append("\n".join(current_chunk))
+                            current_chunk = [line]
+                            current_length = line_length
+                        else:
+                            current_chunk.append(line)
+                            current_length += line_length
+
+                    if current_chunk:
+                        chunks.append("\n".join(current_chunk))
+
+                    logger.debug(f"Split into {len(chunks)} chunks")
+                    for i, chunk in enumerate(chunks, 1):
+                        embed.add_field(
+                            name=f"🎫 Ticket Holders (Part {i})",
+                            value=chunk,
+                            inline=False,
+                        )
+                else:
+                    embed.add_field(
+                        name="🎫 Ticket Holders",
+                        value=ticket_text,
+                        inline=False,
+                    )
+            else:
+                logger.debug("No ticket holders")
+                embed.add_field(
+                    name="🎫 Ticket Holders",
+                    value="No tickets purchased yet",
+                    inline=False,
+                )
+
+            embed.set_footer(
+                text=f"Last updated: {data['last_updated'] or 'Never'} | 1 ticket = 1M GP"
+            )
+
+            logger.info("Attempting to edit message with new embed")
+            await self.message.edit(embed=embed)
+            logger.info("View update completed successfully")
+
+        except discord.HTTPException as e:
+            logger.error(f"Discord HTTP error during view update: {e}", exc_info=True)
+        except Exception as e:
+            logger.error(f"Unexpected error during view update: {e}", exc_info=True)
 
 
 # Decorator to check if the user has the allowed role
@@ -165,7 +196,9 @@ def has_allowed_role():
     async def predicate(interaction: discord.Interaction) -> bool:
         if isinstance(interaction.user, discord.Member):
             if allowed_role_id in [role.id for role in interaction.user.roles]:
+                logger.debug(f"User {interaction.user.id} has allowed role")
                 return True
+        logger.warning(f"User {interaction.user.id} does not have allowed role")
         await interaction.response.send_message(
             "You do not have permission to use this command.", ephemeral=True
         )
@@ -177,11 +210,16 @@ def has_allowed_role():
 async def _update_view():
     """Helper function to update the persistent view"""
     global persistent_view_message
-    if persistent_view_message:
-        view = RaffleView()
-        view.message = persistent_view_message
-        await view.update_view()
-
+    try:
+        if persistent_view_message:
+            logger.info(f"Updating persistent view (message ID: {persistent_view_message.id})")
+            view = RaffleView()
+            view.message = persistent_view_message
+            await view.update_view()
+        else:
+            logger.warning("Attempted to update view but persistent_view_message is None")
+    except Exception as e:
+        logger.error(f"Error in _update_view: {e}", exc_info=True)
 
 @raffle.command()
 @has_allowed_role()
