@@ -58,8 +58,8 @@ def place_icon(
     paste_y = y + oy
 
     if shadow:
-        ellipse_w = int(w * 0.9)
-        ellipse_h = int(h * 0.2)
+        ellipse_w = int(w * 1.1)
+        ellipse_h = int(h * 0.3)
         cx = paste_x + w // 2
         cy = paste_y + h + shadow_offset
 
