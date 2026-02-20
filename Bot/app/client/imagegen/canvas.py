@@ -1,9 +1,9 @@
 from PIL import Image, ImageDraw
 
-from models import CanvasLayout, OTWEntry, ColorKey
-from fonts import FontSet
-from layouts import LayoutPreset, EntrySlot
-from drawing import (
+from .models import CanvasLayout, OTWEntry, ColorKey
+from .fonts import FontSet
+from .layouts import LayoutPreset, EntrySlot
+from .drawing import (
     draw_text_shadow,
     draw_underlined_text,
     place_icon,
