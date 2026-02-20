@@ -59,7 +59,6 @@ def place_icon(
     paste_y = y + oy
 
     if shadow:
-        # Create shadow from icon's alpha channel
         shadow_img = Image.new("RGBA", base.size, (0, 0, 0, 0))
         shadow_icon = Image.new("RGBA", icon.size, (0, 0, 0, shadow_opacity))
         shadow_icon.putalpha(

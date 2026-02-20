@@ -101,7 +101,7 @@ class OTWCanvas:
         )
 
         # Icon
-        place_icon(
+        self.base = place_icon(
             self.base,
             entry.icon_path,
             (icon_x, icon_y),
@@ -112,6 +112,7 @@ class OTWCanvas:
             shadow_blur=8,
             shadow_opacity=120,
         )
+        self.draw = ImageDraw.Draw(self.base)
 
     def _draw_date(self) -> None:
         lo = self.layout
