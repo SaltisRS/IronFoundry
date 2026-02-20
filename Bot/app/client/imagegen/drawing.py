@@ -1,5 +1,5 @@
 from pathlib import Path
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageDraw
 
 
 def resize_keep_aspect(icon: Image.Image, target_size: tuple[int, int]) -> Image.Image:
@@ -59,7 +59,7 @@ def place_icon(
 
     if shadow:
         draw = ImageDraw.Draw(base)
-        ellipse_w = int(w * 0.7)
+        ellipse_w = int(w * 0.9)
         ellipse_h = int(h * 0.2)
         cx = paste_x + w // 2
         cy = paste_y + h + shadow_offset
