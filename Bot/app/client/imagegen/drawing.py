@@ -1,5 +1,5 @@
 from pathlib import Path
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFilter
 
 
 def resize_keep_aspect(icon: Image.Image, target_size: tuple[int, int]) -> Image.Image:
@@ -18,6 +18,10 @@ def place_icon(
     anchor: str = "tl",
     opacity: int = 255,
     rotate: int = 0,
+    shadow: bool = False,
+    shadow_offset: int = 8,
+    shadow_blur: int = 6,
+    shadow_opacity: int = 100,
 ) -> Image.Image:
     icon = Image.open(icon_path)
 
@@ -26,7 +30,9 @@ def place_icon(
     if size:
         icon = resize_keep_aspect(icon, size)
     if rotate != 0:
-        icon = icon.rotate(rotate, expand=True, resample=Image.Resampling.BICUBIC)
+        icon = icon.rotate(
+            rotate, expand=True, resample=Image.Resampling.BICUBIC
+        )
     if opacity < 255:
         alpha = icon.split()[3]
         alpha = alpha.point(lambda p: int(p * opacity / 255))
@@ -49,7 +55,29 @@ def place_icon(
     }
 
     ox, oy = anchor_offsets.get(anchor, (0, 0))
-    base.paste(icon, (x + ox, y + oy), icon)
+    paste_x = x + ox
+    paste_y = y + oy
+
+    if shadow:
+        # Create shadow from icon's alpha channel
+        shadow_img = Image.new("RGBA", base.size, (0, 0, 0, 0))
+        shadow_icon = Image.new("RGBA", icon.size, (0, 0, 0, shadow_opacity))
+        shadow_icon.putalpha(
+            icon.split()[3].point(
+                lambda p: min(p, shadow_opacity)
+            )
+        )
+        shadow_img.paste(
+            shadow_icon,
+            (paste_x + shadow_offset, paste_y + shadow_offset),
+            shadow_icon,
+        )
+        shadow_img = shadow_img.filter(
+            ImageFilter.GaussianBlur(radius=shadow_blur)
+        )
+        base = Image.alpha_composite(base.convert("RGBA"), shadow_img)
+
+    base.paste(icon, (paste_x, paste_y), icon)
     return base
 
 
