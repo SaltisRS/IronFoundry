@@ -62,7 +62,7 @@ def place_icon(
         ellipse_h = int(h * 0.2)
         cx = paste_x + w // 2
         cy = paste_y + h + shadow_offset
-    
+
         overlay = Image.new("RGBA", base.size, (0, 0, 0, 0))
         overlay_draw = ImageDraw.Draw(overlay)
         overlay_draw.ellipse(
@@ -78,6 +78,8 @@ def place_icon(
             Image.alpha_composite(base.convert("RGBA"), overlay),
             (0, 0),
         )
+
+    base.paste(icon, (paste_x, paste_y), icon)
     return base
 
 
