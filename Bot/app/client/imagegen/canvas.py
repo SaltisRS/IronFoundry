@@ -108,8 +108,8 @@ class OTWCanvas:
             size=(150, 150),
             anchor="center",
             shadow=True,
-            shadow_offset=6,
-            shadow_opacity=30,
+            shadow_offset=2,
+            shadow_opacity=40,
         )
 
     def _draw_date(self) -> None:
