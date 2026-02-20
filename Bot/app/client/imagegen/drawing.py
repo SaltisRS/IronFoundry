@@ -19,9 +19,8 @@ def place_icon(
     opacity: int = 255,
     rotate: int = 0,
     shadow: bool = False,
-    shadow_offset: int = 8,
-    shadow_blur: int = 6,
-    shadow_opacity: int = 100,
+    shadow_offset: int = 6,
+    shadow_opacity: int = 80,
 ) -> Image.Image:
     icon = Image.open(icon_path)
 
@@ -59,22 +58,20 @@ def place_icon(
     paste_y = y + oy
 
     if shadow:
-        shadow_img = Image.new("RGBA", base.size, (0, 0, 0, 0))
-        shadow_icon = Image.new("RGBA", icon.size, (0, 0, 0, shadow_opacity))
-        shadow_icon.putalpha(
-            icon.split()[3].point(
-                lambda p: min(p, shadow_opacity)
-            )
+        draw = ImageDraw.Draw(base)
+        ellipse_w = int(w * 0.7)
+        ellipse_h = int(h * 0.2)
+        cx = paste_x + w // 2
+        cy = paste_y + h + shadow_offset
+        draw.ellipse(
+            [
+                cx - ellipse_w // 2,
+                cy - ellipse_h // 2,
+                cx + ellipse_w // 2,
+                cy + ellipse_h // 2,
+            ],
+            fill=(0, 0, 0, shadow_opacity),
         )
-        shadow_img.paste(
-            shadow_icon,
-            (paste_x + shadow_offset, paste_y + shadow_offset),
-            shadow_icon,
-        )
-        shadow_img = shadow_img.filter(
-            ImageFilter.GaussianBlur(radius=shadow_blur)
-        )
-        base = Image.alpha_composite(base.convert("RGBA"), shadow_img)
 
     base.paste(icon, (paste_x, paste_y), icon)
     return base
