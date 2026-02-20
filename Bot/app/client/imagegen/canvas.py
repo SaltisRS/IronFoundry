@@ -30,7 +30,7 @@ class OTWCanvas:
         preset: LayoutPreset,
         date_text: str,
     ):
-        self.base = Image.open(BASE_DIR / base_path).convert("RGBA")
+        self.base = Image.open(BASE_DIR / base_path)
         self.draw = ImageDraw.Draw(self.base)
         self.layout = layout
         self.fonts = fonts
