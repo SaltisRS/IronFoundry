@@ -20,8 +20,8 @@ LAYOUT = CanvasLayout(
     pad_y=60,
 )
 LAYOUT.colors = (ColorKey.SOTW, (57, 117, 64))
-LAYOUT.colors = (ColorKey.BOTW, (128, 0, 32))
-LAYOUT.colors = (ColorKey.ROTW, (61, 29, 105))
+LAYOUT.colors = (ColorKey.BOTW, (45, 72, 247))
+LAYOUT.colors = (ColorKey.ROTW, (110, 7, 245))
 LAYOUT.colors = (ColorKey.HIGHLIGHT_DATE, (128, 0, 32))
 
 FONTS = FontSet(
