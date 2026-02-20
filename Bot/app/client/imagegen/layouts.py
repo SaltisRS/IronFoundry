@@ -72,7 +72,7 @@ TRIPLE_LAYOUT = LayoutPreset(
             text_anchor="mm",
             text_x_func="center",
             icon_x_func="center",
-            y_offset=160,
+            y_offset=120,
         ),
         EntrySlot(
             text_anchor="rm",
