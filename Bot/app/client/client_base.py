@@ -15,8 +15,9 @@ from client.modules.tempvc import voice_state_update
 from client.modules.tempvc import setup as tempvc_setup
 from client.commands.message_tags import setup as tag_setup
 from client.modules.ticket_tracker import last_activity, warned, ticket_archive
-from client.commands.lock_category import lock_category, locked_categories
+from client.commands.lock_category import locked_categories
 from client.commands.raffle import setup as raffle_setup
+from client.commands.otw import register_otw_command
 
 channels_to_track = [1386299832196399217, 1088090554216235019, 1386299925641433198]
 staff_roles = [965399119021617162, 965402001066299424]
@@ -93,7 +94,7 @@ class DiscordClient(discord.Client):
         await tempvc_setup(self, self.selected_guild)
         await raffle_setup(self, self.selected_guild)
         await tag_setup(self, self.selected_guild)
-        self.tree.add_command(lock_category, guild=self.selected_guild)
+        register_otw_command(self.tree, self.selected_guild)
         result = await self.tree.sync(guild=self.selected_guild)
         logger.info(f"Commands loaded: {result}")
 

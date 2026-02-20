@@ -23,6 +23,7 @@ _json_lock = asyncio.Lock()
 # JSON helpers (async-safe)
 # =========================
 
+
 def _sync_read_json():
     try:
         with open(DATA_FILE, "r") as f:
@@ -48,10 +49,11 @@ async def _read_json():
 async def _write_json(data: dict):
     await asyncio.to_thread(_sync_write_json, data)
 
+
 def discord_timestamp(iso_string: str | None, style: str = "R") -> str:
     """
     Convert an ISO timestamp to a Discord-formatted timestamp.
-    
+
     Parameters:
     - iso_string: ISO 8601 timestamp string (e.g., from data['last_updated'])
     - style: Discord timestamp style (R = relative, f = short datetime, F = long, etc.)
@@ -69,9 +71,11 @@ def discord_timestamp(iso_string: str | None, style: str = "R") -> str:
     except Exception:
         return "Never"
 
+
 # =========================
 # Raffle View
 # =========================
+
 
 class RaffleView(View):
     def __init__(self):
@@ -107,11 +111,17 @@ class RaffleView(View):
                 description="Current raffle stats and prize breakdown",
                 color=discord.Color.gold(),
             )
-            embed.set_image(url="https://media.discordapp.net/attachments/965397194482012200/1451652879646588968/RAFFLE_FLYER_2.png?ex=6946f498&is=6945a318&hm=2b32f2f9216fe5c3926138460a320bfc1bc32564988147162cf099fd5824ade9&=&format=webp&quality=lossless&width=1324&height=2353")
+            embed.set_image(
+                url="https://media.discordapp.net/attachments/965397194482012200/1451652879646588968/RAFFLE_FLYER_2.png?ex=6946f498&is=6945a318&hm=2b32f2f9216fe5c3926138460a320bfc1bc32564988147162cf099fd5824ade9&=&format=webp&quality=lossless&width=1324&height=2353"
+            )
             # ---- Totals ----
             embed.add_field(name="💰 Total Pot", value=f"{total_pot:,} GP", inline=True)
-            embed.add_field(name="🎫 Total Tickets", value=f"{total_tickets:,}", inline=True)
-            embed.add_field(name="💎 Total Donations", value=f"{total_donations:,} GP", inline=True)
+            embed.add_field(
+                name="🎫 Total Tickets", value=f"{total_tickets:,}", inline=True
+            )
+            embed.add_field(
+                name="💎 Total Donations", value=f"{total_donations:,} GP", inline=True
+            )
 
             # ---- Prizes ----
             embed.add_field(
@@ -157,7 +167,9 @@ class RaffleView(View):
                     if field_count >= 25:
                         break
                     embed.add_field(
-                        name="🎫 Ticket Holders" if i == 0 else f"🎫 Ticket Holders (Part {i+1})",
+                        name="🎫 Ticket Holders"
+                        if i == 0
+                        else f"🎫 Ticket Holders (Part {i + 1})",
                         value=chunk,
                         inline=False,
                     )
@@ -201,7 +213,7 @@ class RaffleView(View):
                     if field_count >= 25:
                         break
                     embed.add_field(
-                        name="💎 Donators" if i == 0 else f"💎 Donators (Part {i+1})",
+                        name="💎 Donators" if i == 0 else f"💎 Donators (Part {i + 1})",
                         value=chunk,
                         inline=False,
                     )
@@ -217,7 +229,6 @@ class RaffleView(View):
                 text=f"Last updated: {discord_timestamp(data.get('last_updated'))} | 1 ticket = 1M GP"
             )
 
-
             await self.message.edit(embed=embed)
 
         except discord.HTTPException:
@@ -226,10 +237,10 @@ class RaffleView(View):
             logger.exception("Unexpected error updating raffle view")
 
 
-
 # =========================
 # Permissions
 # =========================
+
 
 def has_allowed_role():
     async def predicate(interaction: discord.Interaction) -> bool:
@@ -249,6 +260,7 @@ def has_allowed_role():
 # =========================
 # View helpers
 # =========================
+
 
 async def _update_view():
     global persistent_view_message
@@ -282,6 +294,7 @@ async def _restore_persistent_view(client: discord.Client):
     persistent_view_message = message
     await view.update_view()
 
+
 def _make_transaction(
     *,
     tx_type: str,
@@ -297,13 +310,17 @@ def _make_transaction(
         "timestamp": discord.utils.utcnow().isoformat(),
     }
 
+
 # =========================
 # Ticket Commands
 # =========================
 
+
 @raffle.command()
 @has_allowed_role()
-async def add(interaction: discord.Interaction, user: discord.Member, num_tickets: int = 1):
+async def add(
+    interaction: discord.Interaction, user: discord.Member, num_tickets: int = 1
+):
     if interaction.user.id == user.id or num_tickets <= 0:
         return await interaction.response.send_message(
             "Invalid ticket operation.", ephemeral=True
@@ -322,7 +339,7 @@ async def add(interaction: discord.Interaction, user: discord.Member, num_ticket
             data["tickets"][uid]["handler"].append(hid)
 
         data["last_updated"] = discord.utils.utcnow().isoformat()
-        
+
         data.setdefault("transactions", [])
         data["transactions"].append(
             _make_transaction(
@@ -333,7 +350,6 @@ async def add(interaction: discord.Interaction, user: discord.Member, num_ticket
             )
         )
 
-        
         await _write_json(data)
 
     await interaction.response.send_message(
@@ -345,7 +361,9 @@ async def add(interaction: discord.Interaction, user: discord.Member, num_ticket
 
 @raffle.command()
 @has_allowed_role()
-async def remove(interaction: discord.Interaction, user: discord.Member, num_tickets: int = 1):
+async def remove(
+    interaction: discord.Interaction, user: discord.Member, num_tickets: int = 1
+):
     if num_tickets <= 0:
         return await interaction.response.send_message(
             "Number of tickets must be greater than 0.", ephemeral=True
@@ -389,9 +407,12 @@ async def remove(interaction: discord.Interaction, user: discord.Member, num_tic
 # Donation Commands
 # =========================
 
+
 @raffle.command()
 @has_allowed_role()
-async def add_donated(interaction: discord.Interaction, user: discord.Member, gp_amount: int):
+async def add_donated(
+    interaction: discord.Interaction, user: discord.Member, gp_amount: int
+):
     if gp_amount <= 0:
         return await interaction.response.send_message(
             "Donation amount must be greater than 0.",
@@ -432,7 +453,9 @@ async def add_donated(interaction: discord.Interaction, user: discord.Member, gp
 
 @raffle.command()
 @has_allowed_role()
-async def remove_donated(interaction: discord.Interaction, user: discord.Member, gp_amount: int):
+async def remove_donated(
+    interaction: discord.Interaction, user: discord.Member, gp_amount: int
+):
     if gp_amount <= 0:
         return await interaction.response.send_message(
             "Donation amount must be greater than 0.",
@@ -477,6 +500,7 @@ async def remove_donated(interaction: discord.Interaction, user: discord.Member,
 # =========================
 # View Commands
 # =========================
+
 
 @raffle.command()
 @has_allowed_role()
@@ -537,6 +561,7 @@ async def remove_view(interaction: discord.Interaction):
 
     await interaction.response.send_message("✅ Raffle view removed.", ephemeral=True)
 
+
 @raffle.command()
 @app_commands.default_permissions(administrator=True)
 async def clear(interaction: discord.Interaction):
@@ -558,11 +583,12 @@ async def clear(interaction: discord.Interaction):
 
     await _update_view()
 
+
 @raffle.command()
 @app_commands.describe(
     handler="Filter by staff member who performed the action",
     target="Filter by user who was affected",
-    tx_type="Filter by transaction type (ticket_add, ticket_remove, donation_add, donation_remove, raffle_clear)"
+    tx_type="Filter by transaction type (ticket_add, ticket_remove, donation_add, donation_remove, raffle_clear)",
 )
 async def audit(
     interaction: discord.Interaction,
@@ -620,12 +646,20 @@ async def audit(
         timestamp = tx.get("timestamp", "Unknown Time")
 
         handler_member = guild.get_member(handler_id) if guild else None
-        handler_name = handler_member.mention if handler_member else f"Unknown User (ID: {handler_id})"
+        handler_name = (
+            handler_member.mention
+            if handler_member
+            else f"Unknown User (ID: {handler_id})"
+        )
 
         target_name = "—"
         if target_id:
             target_member = guild.get_member(target_id) if guild else None
-            target_name = target_member.mention if target_member else f"Unknown User (ID: {target_id})"
+            target_name = (
+                target_member.mention
+                if target_member
+                else f"Unknown User (ID: {target_id})"
+            )
 
         tx_map = {
             "ticket_add": "Added Tickets",
@@ -707,12 +741,20 @@ async def audit_summary(interaction: discord.Interaction):
 
     field_count = 0
 
-    for handler_id, types in sorted(handler_map.items(), key=lambda x: (len(x[1]["tickets"]) + len(x[1]["donations"])), reverse=True):
+    for handler_id, types in sorted(
+        handler_map.items(),
+        key=lambda x: (len(x[1]["tickets"]) + len(x[1]["donations"])),
+        reverse=True,
+    ):
         if field_count >= 25:
             break
 
         handler_member = guild.get_member(int(handler_id)) if guild else None
-        handler_name = handler_member.mention if handler_member else f"Unknown User (ID: {handler_id})"
+        handler_name = (
+            handler_member.mention
+            if handler_member
+            else f"Unknown User (ID: {handler_id})"
+        )
 
         lines = []
 
@@ -758,6 +800,7 @@ async def audit_summary(interaction: discord.Interaction):
 # =========================
 # Setup
 # =========================
+
 
 async def setup(client: discord.Client, guild: discord.Guild):
     client.tree.add_command(raffle, guild=guild)

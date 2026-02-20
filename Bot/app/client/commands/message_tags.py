@@ -1,6 +1,5 @@
 import os
 import discord
-from loguru import logger
 from .groups.tags import Tags
 
 group = Tags()
