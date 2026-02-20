@@ -39,13 +39,15 @@ ALL_BOSSES = [
     for icon in BossIcon
 ]
 
+RAID_DISPLAY_NAMES: dict[str, str] = {
+    "COX": "Chambers of Xeric",
+    "TOB": "Theatre of Blood",
+    "TOA": "Tombs of Amascut",
+}
+
 ALL_RAIDS = [
     app_commands.Choice(name=name, value=value)
-    for name, value in [
-        ("Chambers of Xeric", "COX"),
-        ("Theatre of Blood", "TOB"),
-        ("Tombs of Amascut", "TOA"),
-    ]
+    for value, name in RAID_DISPLAY_NAMES.items()
 ]
 
 
@@ -79,8 +81,9 @@ async def raid_autocomplete(
 def _resolve_entry(
     value: Optional[str],
     label: str,
-    icon_enum: type[SkillIcon] | type[BossIcon],
+    icon_enum: type[BossIcon] | type[SkillIcon],
     color_key: ColorKey,
+    display_names: Optional[dict[str, str]] = None,
 ) -> Optional[OTWEntry]:
     if not value:
         return None
@@ -88,9 +91,14 @@ def _resolve_entry(
         icon = icon_enum[value]
     except KeyError:
         return None
+    name = (
+        display_names[value]
+        if display_names and value in display_names
+        else value.replace("_", " ").title()
+    )
     return OTWEntry(
         label=label,
-        name=value.replace("_", " ").title(),
+        name=name,
         icon_path=icon.path,
         color_key=color_key,
     )
@@ -119,14 +127,14 @@ def register_otw_command(tree: app_commands.CommandTree, _guild):
         await interaction.response.defer()
 
         entry_configs = [
-            (skill, "SKILL OF THE WEEK", SkillIcon, ColorKey.SOTW),
-            (boss, "BOSS OF THE WEEK", BossIcon, ColorKey.BOTW),
-            (raid, "RAID OF THE WEEK", BossIcon, ColorKey.ROTW),
+            (skill, "SKILL OF THE WEEK", SkillIcon, ColorKey.SOTW, None),
+            (boss, "BOSS OF THE WEEK", BossIcon, ColorKey.BOTW, None),
+            (raid, "RAID OF THE WEEK", BossIcon, ColorKey.ROTW, RAID_DISPLAY_NAMES),
         ]
-
+        
         entries: list[OTWEntry] = []
-        for value, label, icon_enum, color_key in entry_configs:
-            entry = _resolve_entry(value, label, icon_enum, color_key)
+        for value, label, icon_enum, color_key, names in entry_configs:
+            entry = _resolve_entry(value, label, icon_enum, color_key, names)
             if value and not entry:
                 await interaction.followup.send(
                     f"Unknown value: {value}", ephemeral=True
