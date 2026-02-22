@@ -2,10 +2,16 @@ import discord
 import asyncio
 
 from discord import app_commands
+from discord.types.interactions import Interaction
 from loguru import logger
 
 vc_cat = 945052365873090651
 active_channels: dict[int, int] = {}
+gim_roles = [1463908238033682443,1463908324646060209,1463918329310875738,1463969226300592311,1464774588717334764]
+
+
+async def match_gim_role(roles: list[discord.Role]) -> list[discord.Role]:
+    return [role for role in roles if role.id in gim_roles]
 
 
 async def is_empty(channel: discord.VoiceChannel) -> bool:
@@ -34,12 +40,12 @@ async def set_invite_permissions(
     await channel.set_permissions(target=invited, view_channel=True, connect=True)
 
 
-async def set_permissions(channel: discord.VoiceChannel, user: discord.Member):
+async def set_permissions(channel: discord.VoiceChannel, user_or_role: discord.Member | discord.Role):
     await channel.set_permissions(
         target=channel.guild.default_role, connect=False, view_channel=False
     )
     await channel.set_permissions(
-        target=user, connect=True, view_channel=True, move_members=True
+        target=user_or_role, connect=True, view_channel=True, move_members=True
     )
 
 
@@ -183,7 +189,63 @@ class PromptView(discord.ui.View):
             await interaction.response.send_modal(PromptModal())
         except Exception as e:
             logger.error(f"Failed to send modal: {e}")
-
+    
+    @discord.ui.button(
+        label="GIM VC", style=discord.ButtonStyle.green, custom_id="gim_vc_btn"
+    )
+    async def gim_vc(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if has_active_channel(interaction.user.id):
+            await interaction.response.send_message("You already have an active voice channel!",
+                ephemeral=True,
+                delete_after=5,
+            )
+            return
+        
+        try:
+            user_roles = interaction.user.roles
+            gim = await match_gim_role(user_roles)
+            if gim:
+                try:
+                    category = interaction.guild.get_channel(vc_cat)
+                    if category:
+                        channel_name = gim[0].name
+            
+                        channel = await category.create_voice_channel(
+                            name=channel_name,
+                            position=1
+                        )
+            
+                        add_active_channel(channel, interaction.user.id)
+                        await set_permissions(channel, gim[0])
+            
+            
+                        await interaction.response.send_message(
+                            f"Created channel: **{channel.name}**\n",
+                            ephemeral=True,
+                            delete_after=10,
+                        )
+            
+                        asyncio.create_task(self_destruct(channel, interaction.user.id))
+                    else:
+                        return
+        
+                except Exception as e:
+                    logger.error(f"Failed to create custom VC: {e}")
+                    await interaction.response.send_message(
+                        "Failed to create voice channel. Please try again.",
+                        ephemeral=True,
+                        delete_after=5,
+                    )
+            else:
+                await interaction.response.send_message("You are not in a listed gim group.", ephemeral=True, delete_after=10)
+                return
+        except Exception as e:
+            logger.error(f"Failed to create custom VC: {e}")
+            await interaction.response.send_message(
+                "Failed to create voice channel. Please try again.",
+                ephemeral=True,
+                delete_after=5,
+            )
 
 async def voice_state_update(
     member: discord.Member, before: discord.VoiceState, after: discord.VoiceState
