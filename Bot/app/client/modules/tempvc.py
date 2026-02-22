@@ -2,7 +2,6 @@ import discord
 import asyncio
 
 from discord import app_commands
-from discord.types.interactions import Interaction
 from loguru import logger
 
 vc_cat = 945052365873090651
