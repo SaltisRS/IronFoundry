@@ -19,11 +19,6 @@ persistent_view_message: discord.Message | None = None
 _json_lock = asyncio.Lock()
 
 
-# =========================
-# JSON helpers (async-safe)
-# =========================
-
-
 def _sync_read_json():
     try:
         with open(DATA_FILE, "r") as f:

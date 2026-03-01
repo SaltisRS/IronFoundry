@@ -142,10 +142,9 @@ class DiscordClient(discord.Client):
         logger.info(f"{member} joined the server")
         await member.add_roles(
             *[
-                discord.Object(id=1279492982902358119),
-                discord.Object(id=1279852765803446403),
                 discord.Object(id=1386302676920176640),
-                discord.Object(id=1333568211987206238),
+                discord.Object(id=989296827360763934),
+                discord.Object(id=989297752548716545),
             ]
         )
         await general.send(f"{join_msg}\n\n{member.mention}")
